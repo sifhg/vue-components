@@ -1,0 +1,36 @@
+{
+  "name": "vue-component-collection",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.31"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4",
+    "vue-tsc": "^2.0.24"
+  },
+  "description": "A collection of vue components I've created.",
+  "main": "src/main.js",
+  "repository": {
+    "type": "git",
+    "url": "vue-components"
+  },
+  "keywords": [
+    "vue",
+    "js",
+    "ts",
+    "reusable",
+    "components",
+    "collection"
+  ],
+  "author": "Sif Høg-Getgood",
+  "license": "MIT"
+}
