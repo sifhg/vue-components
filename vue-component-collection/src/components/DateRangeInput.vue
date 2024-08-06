@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DayBox from "./DateRangeInput/DayBox.vue";
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
   width?: CSSUnit;
@@ -51,6 +52,13 @@ const props = withDefaults(defineProps<DateRangeInputProps>(), {
   width: "100%",
   lastDay: new Date(),
 });
+
+const MONTH_LIST = Array(12)
+  .fill(0)
+  .map((_, index) => index + 1);
+const DAY_LIST = Array(31)
+  .fill(0)
+  .map((_, index) => index + 1);
 </script>
 
 <template>
@@ -66,15 +74,7 @@ const props = withDefaults(defineProps<DateRangeInputProps>(), {
       </svg>
     </div>
     <div class="date-container">
-      <YearBox
-        v-if="props.displayFineness.includes('years')"
-        :display-fineness="props.displayFineness"
-      ></YearBox>
-      <MonthBox
-        v-else-if="props.displayFineness.includes('months')"
-        :display-fineness="props.displayFineness"
-      ></MonthBox>
-      <DayBox v-else-if="props.displayFineness.includes('days')"></DayBox>
+      <DayBox v-for="day in DAY_LIST" :day="day" :selected="day > 10"></DayBox>
     </div>
     <div class="scroll-right scroll">
       <svg
