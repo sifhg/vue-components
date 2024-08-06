@@ -2,6 +2,7 @@
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
   width?: CSSUnit;
+  lastDate?: Date;
 };
 type _CSSUnitSuffix = `${"" | " "}${
   | "cm"
@@ -48,6 +49,7 @@ function _daysIn(arg0: _month | _year, arg1?: _year): number {
 
 const props = withDefaults(defineProps<DateRangeInputProps>(), {
   width: "100%",
+  lastDay: new Date(),
 });
 </script>
 
@@ -64,18 +66,15 @@ const props = withDefaults(defineProps<DateRangeInputProps>(), {
       </svg>
     </div>
     <div class="date-container">
-      <div
-        v-if="props.displayFineness.includes('days')"
-        class="day-container container"
-      ></div>
-      <div
-        v-if="props.displayFineness.includes('months')"
-        class="month-container container"
-      ></div>
-      <div
+      <YearBox
         v-if="props.displayFineness.includes('years')"
-        class="year-container container"
-      ></div>
+        :display-fineness="props.displayFineness"
+      ></YearBox>
+      <MonthBox
+        v-else-if="props.displayFineness.includes('months')"
+        :display-fineness="props.displayFineness"
+      ></MonthBox>
+      <DayBox v-else-if="props.displayFineness.includes('days')"></DayBox>
     </div>
     <div class="scroll-right scroll">
       <svg
