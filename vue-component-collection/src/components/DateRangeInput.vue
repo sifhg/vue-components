@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import DayBox from "./DateRangeInput/DayBox.vue";
+import MonthBox from "./DateRangeInput/MonthBox.vue";
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
   width?: CSSUnit;
@@ -22,43 +24,16 @@ type _CSSUnitSuffix = `${"" | " "}${
   | "vmax"
   | "%"}`;
 type CSSUnit = `${number}${_CSSUnitSuffix}` | "0";
-const test = "100%";
-
-type _digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
-type _year = `${_digit}${_digit}${_digit}${_digit}`;
-type _month = `${"0" | "1"}${_digit}`;
-
-function _daysIn(year: _year): number;
-function _daysIn(month: _month, year: _year): number;
-function _daysIn(arg0: _month | _year, arg1?: _year): number {
-  let firstDay: number;
-  let lastDay: number;
-  if (arg1) {
-    if (Number(arg0) >= 12 || Number(arg0) < 0) {
-      throw new Error(
-        `month parameter is ${arg0}. It must be a non-negative integer less than 12.`
-      );
-    }
-    firstDay = new Date(Number(arg1), Number(arg0)).getTime();
-    lastDay = new Date(Number(arg1), Number(arg0) + 1).getTime();
-  } else {
-    firstDay = new Date(Number(arg0), 0).getTime();
-    lastDay = new Date(Number(arg0) + 1, 0).getTime();
-  }
-  return (lastDay - firstDay) / 86400000;
-}
 
 const props = withDefaults(defineProps<DateRangeInputProps>(), {
   width: "100%",
   lastDay: new Date(),
 });
 
-const MONTH_LIST = Array(12)
-  .fill(0)
-  .map((_, index) => index + 1);
-const DAY_LIST = Array(31)
-  .fill(0)
-  .map((_, index) => index + 1);
+const displayFineness = ref(new Set(props.displayFineness));
+const mouseHoverDate = ref<Date | false>(false);
+
+const MONTH_LIST = [1, 2, 3, 4];
 </script>
 
 <template>
@@ -74,7 +49,17 @@ const DAY_LIST = Array(31)
       </svg>
     </div>
     <div class="date-container">
-      <DayBox v-for="day in DAY_LIST" :day="day" :selected="day > 10"></DayBox>
+      <MonthBox
+        v-for="month in MONTH_LIST"
+        :month="month"
+        :year="2021"
+        :range="{
+          firstDate: new Date(2021, 1, 10),
+          lastDate: new Date(2021, 4, 10),
+        }"
+        :displayFineness="displayFineness"
+      />
+      <!-- <DayBox v-for="day in DAY_LIST" :day="day" :selected="day > 5"></DayBox> -->
     </div>
     <div class="scroll-right scroll">
       <svg
@@ -94,9 +79,21 @@ div {
   border: solid black 1px;
   min-height: 10px;
   min-width: 10px;
+  user-select: none;
 }
 .date-container {
   flex-grow: 1;
+  display: flex;
+}
+.month-box {
+  flex-grow: 1;
+  align-content: center;
+  text-align: center;
+}
+.day-box {
+  flex-grow: 1;
+  align-content: center;
+  text-align: center;
 }
 .scroll {
   flex-basis: 3rem;
@@ -105,5 +102,8 @@ div {
 }
 .date-range-input {
   display: flex;
+}
+.selected {
+  background-color: blue;
 }
 </style>
