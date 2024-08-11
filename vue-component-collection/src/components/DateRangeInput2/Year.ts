@@ -1,17 +1,24 @@
+import GoodCanvas from "./GoodCanvas/CanvasAPI";
 import Month from "./Month";
 
 class Year {
   private _year: number;
   private _months: Month[];
   private _width: number;
-  constructor(year: number, startDate: Date, endDate: Date) {
+  constructor(year: number, startDate: Date, endDate: Date, unitSize: number) {
     this._year = year;
     this._months = (() => {
       const MONTHS_ARRAY: Month[] = [];
       let iDate = new Date(startDate.getFullYear(), startDate.getMonth());
       while (iDate <= endDate) {
         MONTHS_ARRAY.push(
-          new Month(iDate.getMonth(), iDate.getFullYear(), startDate, endDate)
+          new Month(
+            iDate.getMonth(),
+            iDate.getFullYear(),
+            startDate,
+            endDate,
+            unitSize
+          )
         );
         iDate.setMonth(iDate.getMonth() + 1);
       }
@@ -24,7 +31,7 @@ class Year {
     });
   }
 
-  display(x: number, y: number, unitSize: number) {}
+  display(x: number, y: number, canvas: GoodCanvas) {}
 
   get year(): number {
     return this._year;

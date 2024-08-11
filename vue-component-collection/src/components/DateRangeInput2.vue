@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import GoodCanvas from "./DateRangeInput2/GoodCanvas/CanvasAPI";
-import { Colour } from "./DateRangeInput2/GoodCanvas/Colour";
+import { Colour, createColour } from "./DateRangeInput2/GoodCanvas/Colour";
 
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
@@ -29,6 +29,14 @@ onMounted(() => {
   canvas.value = new GoodCanvas("date-selection-canvas");
   canvas.value.setCanvasSize(width.value!, props.unitSize * 5);
   canvas.value.background(new Colour("GREYSCALE", 207));
+  canvas.value.createRect(
+    0,
+    0,
+    props.unitSize,
+    props.unitSize * 3,
+    createColour("GREYSCALE", 255),
+    "left-scroll"
+  );
   canvas.value.render(true);
 });
 </script>
