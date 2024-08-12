@@ -1,31 +1,23 @@
-import { Colour, ColourString, isColourString } from "./Colour.js";
-import Vector from "./Vector.js";
-
-type Size = { w: number; h: number };
-
-type ShapeTag =
-  | { tag: "circle"; r: number }
-  | { tag: "rect"; size: Size; borderRadius?: number };
-type Shape = {
-  pos: Vector;
-  label?: string;
-  colour?: ColourString | Colour | boolean;
-} & ShapeTag;
+import { PGColour } from "./PGColour.js";
+import { isColourString } from "../utils/isColourString.js";
+import { ColourString, Size } from "../types.js";
+import { PGShape } from "./PGShape.js";
+import { PGVector } from "./PGVector.js";
 
 /**
  * Creates a canvas or links the a canvas project to a specified HTML canvas element.
  */
-class GoodCanvas {
-  private shapes: Array<Shape>;
+class PGCanvas {
+  private shapes: Array<PGShape>;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private canvasSize: { w: number; h: number };
-  private backgroundColour: Colour | undefined;
+  private canvasSize: Size;
+  private backgroundColour: PGColour | undefined;
   private _frameRate: number;
   private _runtimeFrameRate: number;
   private _frameCount: number;
   private _looping: boolean;
-  private _mouseHistory: [Vector, Vector];
+  private _mouseHistory: [PGVector, PGVector];
 
   /**
    * Create or link a canvas.
@@ -33,7 +25,7 @@ class GoodCanvas {
    */
   constructor(canvasID: string) {
     this.shapes = [];
-    this._mouseHistory = [new Vector([0, 0]), new Vector([0, 0])];
+    this._mouseHistory = [new PGVector([0, 0]), new PGVector([0, 0])];
 
     document.addEventListener("mousemove", (event) => {
       const MOUSE_POSITION = this.calculateMousePosition(event);
@@ -71,7 +63,7 @@ class GoodCanvas {
    * @param {number} h - height of the canvas
    */
   setCanvasSize(w: number, h: number) {
-    this.shapes = new Array<Shape>();
+    this.shapes = new Array<PGShape>();
     this.canvasSize = {
       w: w,
       h: h,
@@ -83,9 +75,9 @@ class GoodCanvas {
   /**
    * Set the background colour of the canvas.
    *
-   * @param {Colour} colour - background colour.
+   * @param {PGColour} colour - background colour.
    */
-  background(colour: Colour): void {
+  background(colour: PGColour): void {
     this.backgroundColour = colour;
     this.ctx.fillStyle = this.backgroundColour.toString();
     this.ctx.fillRect(0, 0, this.canvasSize.w, this.canvasSize.h);
@@ -97,7 +89,7 @@ class GoodCanvas {
    * @param {number} x
    * @param {number} y
    * @param {number} r
-   * @param {Colour | ColourString | boolean} colour
+   * @param {PGColour | ColourString | boolean} colour
    * @param {string} label
    * @returns
    */
@@ -105,14 +97,14 @@ class GoodCanvas {
     x: number,
     y: number,
     r: number,
-    colour?: Colour | ColourString | boolean,
+    colour?: PGColour | ColourString | boolean,
     label?: string
-  ): Shape {
-    const NEW_CIRCLE: Shape = {
-      pos: new Vector(x, y),
+  ): PGShape {
+    const NEW_CIRCLE: PGShape = new PGShape({
+      pos: new PGVector(x, y),
       tag: "circle",
       r: r,
-    };
+    });
     if (label) {
       NEW_CIRCLE.label = label;
     }
@@ -123,22 +115,77 @@ class GoodCanvas {
     return NEW_CIRCLE;
   }
 
-  createRect(x: number, y: number, w: number, h: number): Shape;
-  createRect(x: number, y: number, w: number, h: number, label?: string): Shape;
+  /**
+   * Creates and adds a path to the canvas.
+   *
+   * @param {Array<PGVector>} path
+   * @param {PGColour | ColourString | boolean} colour
+   * @param {string} label
+   * @returns {PGShape} - a reference to the created path.
+   */
+  createPath(
+    path: Array<PGVector>,
+    colour?: PGColour | ColourString | boolean,
+    label?: string
+  ): PGShape;
+  /**
+   *
+   * @param {Array<PGVector>} path
+   * @param {string} label
+   * @returns {PGShape} - a reference to the created path.
+   */
+  createPath(path: Array<PGVector>, label?: string): PGShape;
+  createPath(
+    arg0: Array<PGVector>,
+    arg1?: PGColour | ColourString | boolean | string,
+    arg2?: string
+  ): PGShape {
+    const NEW_PATH = new PGShape({
+      pos: new PGVector(0, 0),
+      tag: "path",
+      path: [...arg0],
+    });
+    if (
+      arg1 instanceof PGColour ||
+      typeof arg1 === "boolean" ||
+      (typeof arg1 === "string" &&
+        arg1.startsWith("rgb(") &&
+        arg1.endsWith(")"))
+    ) {
+      NEW_PATH.colour = <PGColour | ColourString | boolean>arg1;
+    } else if (typeof arg1 === "string") {
+      NEW_PATH.label = arg1;
+    }
+    if (arg2) {
+      NEW_PATH.label = arg2;
+    }
+
+    this.shapes.push(NEW_PATH);
+    return NEW_PATH;
+  }
+
+  createRect(x: number, y: number, w: number, h: number): PGShape;
+  createRect(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    label?: string
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
     borderRadius?: number
-  ): Shape;
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
-    colour?: Colour | ColourString | boolean
-  ): Shape;
+    colour?: PGColour | ColourString | boolean
+  ): PGShape;
   createRect(
     x: number,
     y: number,
@@ -146,56 +193,56 @@ class GoodCanvas {
     h: number,
     borderRadius?: number,
     label?: string
-  ): Shape;
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
-    colour?: Colour | ColourString | boolean,
+    colour?: PGColour | ColourString | boolean,
     label?: string
-  ): Shape;
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
-    colour?: Colour | ColourString | boolean,
+    colour?: PGColour | ColourString | boolean,
     borderRadius?: number
-  ): Shape;
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
-    colour?: Colour | ColourString | boolean,
+    colour?: PGColour | ColourString | boolean,
     borderRadius?: number,
     label?: string
-  ): Shape;
+  ): PGShape;
   createRect(
     x: number,
     y: number,
     w: number,
     h: number,
-    arg0?: Colour | ColourString | boolean | number | string,
-    arg1?: Colour | ColourString | boolean | number | string,
-    arg2?: Colour | ColourString | boolean | number | string
-  ): Shape {
-    const NEW_RECT: Shape = {
-      pos: new Vector([x, y]),
+    arg0?: PGColour | ColourString | boolean | number | string,
+    arg1?: PGColour | ColourString | boolean | number | string,
+    arg2?: PGColour | ColourString | boolean | number | string
+  ): PGShape {
+    const NEW_RECT: PGShape = new PGShape({
+      pos: new PGVector([x, y]),
       tag: "rect",
       size: {
         w: w,
         h: h,
       },
-    };
+    });
     const OPTIONAL_ARGS = [arg0, arg1, arg2];
     for (const ARG of OPTIONAL_ARGS) {
       if (typeof ARG === "number") {
         NEW_RECT.borderRadius = ARG;
       }
       if (
-        ARG instanceof Colour ||
+        ARG instanceof PGColour ||
         isColourString(ARG) ||
         typeof ARG === "boolean"
       ) {
@@ -210,12 +257,25 @@ class GoodCanvas {
   }
 
   /**
-   * Renders the current composition to the canvas.
+   * Renders the current composition of shapes to the canvas.
    *
    * @param {boolean} [renderBackground = true] - Whether or not to render the background.
    */
   render(renderBackground: boolean = true) {
     renderBackground = renderBackground === undefined ? true : renderBackground;
+    function _handleStroke(canvas: PGCanvas, shape: PGShape) {
+      if (shape.stroke) {
+        if (typeof shape.stroke === "object" && "width" in shape.stroke) {
+          canvas.ctx.lineWidth = <number>shape.stroke.width;
+        }
+        if (typeof shape.stroke === "object" && "colour" in shape.stroke) {
+          canvas.ctx.strokeStyle = <ColourString>(
+            shape.stroke.colour!.toString()
+          );
+        }
+        canvas.ctx.stroke();
+      }
+    }
     if (!this.backgroundColour) {
       this.ctx.fillStyle = "rgb(255 255 255)";
     } else {
@@ -231,7 +291,7 @@ class GoodCanvas {
           this.ctx.arc(SHAPE.pos.x, SHAPE.pos.y, SHAPE.r, 0, 2 * Math.PI);
           if (
             typeof SHAPE.colour === "string" ||
-            SHAPE.colour instanceof Colour
+            SHAPE.colour instanceof PGColour
           ) {
             this.ctx.fillStyle = SHAPE.colour.toString();
             this.ctx.fill();
@@ -240,6 +300,8 @@ class GoodCanvas {
           } else {
             this.ctx.stroke();
           }
+          _handleStroke(this, SHAPE);
+
           this.ctx.closePath();
           break;
         case "rect":
@@ -300,7 +362,7 @@ class GoodCanvas {
 
             if (
               typeof SHAPE.colour === "string" ||
-              SHAPE.colour instanceof Colour
+              SHAPE.colour instanceof PGColour
             ) {
               this.ctx.fillStyle = SHAPE.colour.toString();
               this.ctx.fill();
@@ -309,6 +371,7 @@ class GoodCanvas {
             } else {
               this.ctx.stroke();
             }
+            _handleStroke(this, SHAPE);
             this.ctx.closePath();
             break;
           } else {
@@ -320,7 +383,7 @@ class GoodCanvas {
             this.ctx.lineTo(SHAPE.pos.x, SHAPE.pos.y);
             if (
               typeof SHAPE.colour === "string" ||
-              SHAPE.colour instanceof Colour
+              SHAPE.colour instanceof PGColour
             ) {
               this.ctx.fillStyle = SHAPE.colour.toString();
               this.ctx.fill();
@@ -329,9 +392,33 @@ class GoodCanvas {
             } else {
               this.ctx.stroke();
             }
+            _handleStroke(this, SHAPE);
             this.ctx.closePath();
             break;
           }
+        case "path":
+          this.ctx.beginPath();
+          this.ctx.moveTo(SHAPE.path[0].x, SHAPE.path[0].y);
+          for (const VERTEX of SHAPE.path) {
+            this.ctx.lineTo(VERTEX.x, VERTEX.y);
+          }
+          if (SHAPE.closePath) {
+            this.ctx.closePath();
+          }
+          if (
+            typeof SHAPE.colour === "string" ||
+            SHAPE.colour instanceof PGColour
+          ) {
+            this.ctx.fillStyle = SHAPE.colour.toString();
+            this.ctx.fill();
+          } else if (SHAPE.colour) {
+            this.ctx.fill();
+          } else {
+            this.ctx.stroke();
+          }
+          _handleStroke(this, SHAPE);
+
+          break;
       }
     }
   }
@@ -397,10 +484,10 @@ class GoodCanvas {
   /**
    * Calculates the current mouse position.
    * @param {MouseEvent} event
-   * @returns {Vector}
+   * @returns {PGVector}
    */
-  private calculateMousePosition(event: MouseEvent): Vector {
-    return new Vector(
+  private calculateMousePosition(event: MouseEvent): PGVector {
+    return new PGVector(
       event.clientX - this.canvas.clientLeft,
       event.clientY - this.canvas.clientTop
     );
@@ -428,4 +515,4 @@ class GoodCanvas {
   }
 }
 
-export default GoodCanvas;
+export { PGCanvas };

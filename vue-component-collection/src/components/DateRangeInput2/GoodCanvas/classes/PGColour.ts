@@ -1,5 +1,7 @@
 // Formulas for converting colour formats: https://wizlogo.com/cmyk-to-rgb
 
+import { ColourString, EncodingSpecifier, HEX } from "../types.js";
+
 type RGB = {
   r: number;
   g: number;
@@ -16,74 +18,10 @@ type CMYK = {
   y: number;
   k: number;
 };
-type HEX = `#${string}`;
 type GREYSCALE = number;
 type EncodingType = RGB | HSL | CMYK | HEX | GREYSCALE;
-type ColourString = `rgb(${string})`;
-type EncodingSpecifier = "RGB" | "HSL" | "CMYK" | "HEX" | "GREYSCALE";
 
-function createColour(type: "RGB", r: number, g: number, b: number): Colour;
-function createColour(type: "HSL", h: number, s: number, l: number): Colour;
-function createColour(
-  type: "CMYK",
-  c: number,
-  m: number,
-  y: number,
-  k: number
-): Colour;
-function createColour(type: "HEX", hexCode: HEX): Colour;
-function createColour(type: "GREYSCALE", l: number): Colour;
-function createColour(
-  type: EncodingSpecifier,
-  arg0: number | HEX,
-  arg1?: number,
-  arg2?: number,
-  arg3?: number
-): Colour {
-  switch (type) {
-    case "RGB":
-      return new Colour(type, <number>arg0, <number>arg1, <number>arg2);
-    case "HSL":
-      return new Colour(type, <number>arg0, <number>arg1, <number>arg2);
-    case "CMYK":
-      return new Colour(
-        type,
-        <number>arg0,
-        <number>arg1,
-        <number>arg2,
-        <number>arg3
-      );
-    case "HEX":
-      return new Colour(type, <HEX>arg0);
-    case "GREYSCALE":
-      return new Colour(type, <number>arg0);
-  }
-}
-
-function isColourString(subject: unknown): boolean {
-  if (typeof subject !== "string") {
-    return false;
-  }
-  if (
-    (subject.startsWith("rgb(") ||
-      subject.startsWith("hsl(") ||
-      subject.startsWith("cmyk(") ||
-      subject.startsWith("g(")) &&
-    subject.endsWith(")")
-  ) {
-    return true;
-  }
-  if (
-    subject.startsWith("#") &&
-    subject.length === 7 &&
-    !isNaN(Number(subject.slice(1)))
-  ) {
-    return true;
-  }
-  return false;
-}
-
-class Colour {
+class PGColour {
   private encodingType: EncodingSpecifier;
   private colourValue: EncodingType;
   private asRGB: RGB;
@@ -179,11 +117,4 @@ class Colour {
   }
 }
 
-export {
-  Colour,
-  createColour,
-  isColourString,
-  EncodingType,
-  ColourString,
-  EncodingSpecifier,
-};
+export { PGColour };

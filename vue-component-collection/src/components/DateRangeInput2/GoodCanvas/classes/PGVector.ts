@@ -1,7 +1,6 @@
-type Coordinate = { x: number; y: number };
-type ArrayVector = [number, number];
+import { ArrayVector, Coordinate } from "../types";
 
-class Vector {
+class PGVector {
   private arrayVector: ArrayVector;
 
   constructor(x: number, y: number);
@@ -36,7 +35,7 @@ class Vector {
     throw new Error(`Invalid input for class constructor of Vector.`);
   }
   clone() {
-    return new Vector(this.arrayVector);
+    return new PGVector(this.arrayVector);
   }
   set x(newX: number) {
     this.arrayVector[0] = newX;
@@ -52,4 +51,4 @@ class Vector {
   }
 }
 
-export default Vector;
+export { PGVector };
