@@ -170,6 +170,15 @@ class PGShape {
     this._label = aLabel;
   }
 
+  public set path(aPath: Array<PGVector>) {
+    if (this._tag === "path") {
+      this._path = aPath;
+    } else {
+      throw new Error(`a shape with tag, "${this._tag}",  has no path.
+        Label: ${this._label}`);
+    }
+  }
+
   public set x(newX: number) {
     this._pos.x = newX;
   }

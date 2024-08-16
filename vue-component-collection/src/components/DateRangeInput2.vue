@@ -3,9 +3,11 @@ import { onMounted, ref } from "vue";
 import {
   PGCanvas,
   PGColour,
+  PGShape,
   createColour,
   createVectorArray,
 } from "./DateRangeInput2/GoodCanvas/index";
+import { Size } from "./DateRangeInput2/GoodCanvas/types";
 
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
@@ -20,92 +22,125 @@ const props = withDefaults(defineProps<DateRangeInputProps>(), {
   },
 });
 
-const width = ref<number | undefined>(props.width);
-const canvas = ref<PGCanvas>();
+type ScrollBox = {
+  box: PGShape;
+  arrow: PGShape;
+};
 
-function decrementWidth() {
-  width.value = width.value! - 1;
-  canvas.value?.setCanvasSize(width.value, canvas.value.height);
+const width = ref<number | undefined>(props.width);
+const parentElement = ref<HTMLElement | null>();
+
+// Canvas state
+const canvas = ref<PGCanvas>();
+const scrollBoxLeft = ref<ScrollBox>();
+const scrollBoxRight = ref<ScrollBox>();
+const scrollBoxSize = ref<Size>();
+
+function adjustWidth() {
+  if (
+    !canvas.value ||
+    !scrollBoxLeft.value ||
+    !scrollBoxRight.value ||
+    !scrollBoxSize.value
+  ) {
+    throw new Error(`adjustWidth cannot be called without all canvas states set
+    canvas.value: "${canvas !== undefined ? "set" : "false"}"
+    scrollBoxLeft.value: "${scrollBoxLeft !== undefined ? "set" : "false"}"
+    scrollBoxRight.value: "${scrollBoxRight !== undefined ? "set" : "false"}"
+    scrollBoxSize.value: "${scrollBoxSize !== undefined ? "set" : "false"}"`);
+  }
+
+  width.value = parentElement.value?.clientWidth;
+  canvas.value?.setCanvasSize(width.value!, canvas.value.height);
+  const OLD_POS = scrollBoxRight.value.box.x;
+  scrollBoxRight.value.box.x = canvas.value.width - scrollBoxSize.value.w;
+  scrollBoxRight.value.arrow.path = scrollBoxRight.value.arrow.path.map(
+    (coord) => {
+      const NEW_COORD = coord.clone();
+      NEW_COORD.x = NEW_COORD.x + (scrollBoxRight.value!.box.x - OLD_POS);
+      return NEW_COORD;
+    }
+  );
   canvas.value?.render(true);
 }
 
 onMounted(() => {
-  if (!width.value) {
-    width.value = document.getElementById(
-      "date-selection-canvas"
-    )?.parentElement?.clientWidth;
-  }
-
-  const CANVAS_SIZE = {
-    w: width.value!,
-    h: props.unitSize * props.displayFineness.length,
-  };
+  parentElement.value = document.getElementById(
+    "date-selection-canvas"
+  )?.parentElement;
+  width.value = parentElement.value?.clientWidth;
   canvas.value = new PGCanvas("date-selection-canvas");
-  canvas.value.setCanvasSize(CANVAS_SIZE.w, CANVAS_SIZE.h);
+  canvas.value.setCanvasSize(
+    width.value!,
+    props.unitSize * props.displayFineness.length
+  );
   canvas.value.background(new PGColour("GREYSCALE", 207));
-  const SCROLL_BOX_SIZE = {
-    x: props.unitSize * 1.5,
-    y: CANVAS_SIZE.h,
+  scrollBoxSize.value = {
+    w: props.unitSize * 2,
+    h: canvas.value.height,
   };
-  const SCROLL_LEFT = {
+
+  scrollBoxLeft.value = {
     box: canvas.value.createRect(
       0,
       0,
-      SCROLL_BOX_SIZE.x,
-      SCROLL_BOX_SIZE.y,
+      scrollBoxSize.value.w,
+      scrollBoxSize.value.h,
       createColour("GREYSCALE", 255),
       "left-scroll"
     ),
     arrow: canvas.value.createPath(
       createVectorArray([
         {
-          x: SCROLL_BOX_SIZE.x / 2 + props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2 + props.unitSize / 2,
+          x: scrollBoxSize.value.w / 2 + props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2 + props.unitSize / 2,
         },
         {
-          x: SCROLL_BOX_SIZE.x / 2 - props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2,
+          x: scrollBoxSize.value.w / 2 - props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2,
         },
         {
-          x: SCROLL_BOX_SIZE.x / 2 + props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2 - props.unitSize / 2,
+          x: scrollBoxSize.value.w / 2 + props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2 - props.unitSize / 2,
         },
       ]),
       createColour("GREYSCALE", 208),
       "left-scroll-arrow"
     ),
   };
-  SCROLL_LEFT.box.setStroke(1, createColour("GREYSCALE", 0));
-
-  const SCROLL_RIGHT = {
+  scrollBoxLeft.value.box.setStroke(1, createColour("GREYSCALE", 0));
+  scrollBoxRight.value = {
     box: canvas.value.createRect(
-      CANVAS_SIZE.w - SCROLL_BOX_SIZE.x,
+      canvas.value.width - scrollBoxSize.value.w,
       0,
-      SCROLL_BOX_SIZE.x,
-      SCROLL_BOX_SIZE.y,
+      scrollBoxSize.value.w,
+      scrollBoxSize.value.h,
       createColour("GREYSCALE", 255),
       "right-scroll"
     ),
     arrow: canvas.value.createPath(
       createVectorArray([
         {
-          x: CANVAS_SIZE.w - SCROLL_BOX_SIZE.x / 2 - props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2 + props.unitSize / 2,
+          x:
+            canvas.value.width - scrollBoxSize.value.w / 2 - props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2 + props.unitSize / 2,
         },
         {
-          x: CANVAS_SIZE.w - SCROLL_BOX_SIZE.x / 2 + props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2,
+          x:
+            canvas.value.width - scrollBoxSize.value.w / 2 + props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2,
         },
         {
-          x: CANVAS_SIZE.w - SCROLL_BOX_SIZE.x / 2 - props.unitSize / 4,
-          y: SCROLL_BOX_SIZE.y / 2 - props.unitSize / 2,
+          x:
+            canvas.value.width - scrollBoxSize.value.w / 2 - props.unitSize / 4,
+          y: scrollBoxSize.value.h / 2 - props.unitSize / 2,
         },
       ]),
       createColour("GREYSCALE", 208),
       "left-scroll-arrow"
     ),
   };
-  SCROLL_RIGHT.box.setStroke(1, createColour("GREYSCALE", 0));
+  scrollBoxRight.value.box.setStroke(1, createColour("GREYSCALE", 0));
 
   canvas.value.render(true);
 });
@@ -113,5 +148,5 @@ onMounted(() => {
 
 <template>
   <canvas id="date-selection-canvas"></canvas>
-  <p @click="decrementWidth()">{{ width }}</p>
+  <p @click="adjustWidth">{{ width }}</p>
 </template>
