@@ -1,5 +1,5 @@
-import { PGColour } from "../classes/PGColour";
-import { EncodingSpecifier, HEX } from "../types";
+import { PGColour } from "../classes/PGColour.js";
+import { EncodingSpecifier, HEX } from "../types.js";
 
 function createColour(type: "RGB", r: number, g: number, b: number): PGColour;
 function createColour(type: "HSL", h: number, s: number, l: number): PGColour;

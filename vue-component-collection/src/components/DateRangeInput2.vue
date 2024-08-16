@@ -21,8 +21,14 @@ const props = withDefaults(defineProps<DateRangeInputProps>(), {
 });
 
 const width = ref<number | undefined>(props.width);
-
 const canvas = ref<PGCanvas>();
+
+function decrementWidth() {
+  width.value = width.value! - 1;
+  canvas.value?.setCanvasSize(width.value, canvas.value.height);
+  canvas.value?.render(true);
+}
+
 onMounted(() => {
   if (!width.value) {
     width.value = document.getElementById(
@@ -107,4 +113,5 @@ onMounted(() => {
 
 <template>
   <canvas id="date-selection-canvas"></canvas>
+  <p @click="decrementWidth()">{{ width }}</p>
 </template>

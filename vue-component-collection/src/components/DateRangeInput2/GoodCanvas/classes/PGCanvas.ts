@@ -63,7 +63,6 @@ class PGCanvas {
    * @param {number} h - height of the canvas
    */
   setCanvasSize(w: number, h: number) {
-    this.shapes = new Array<PGShape>();
     this.canvasSize = {
       w: w,
       h: h,

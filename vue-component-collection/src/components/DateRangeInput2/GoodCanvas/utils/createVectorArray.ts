@@ -1,5 +1,5 @@
-import { PGVector } from "../classes/PGVector";
-import { ArrayVector, Coordinate } from "../types";
+import { PGVector } from "../classes/PGVector.js";
+import { ArrayVector, Coordinate } from "../types.js";
 
 function createVectorArray(
   coordinates: Array<Coordinate | ArrayVector | PGVector>

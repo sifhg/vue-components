@@ -141,6 +141,14 @@ class PGShape {
     return this.w;
   }
 
+  public get x(): number {
+    return this._pos.x;
+  }
+
+  public get y(): number {
+    return this._pos.y;
+  }
+
   // Setters
   public set borderRadius(aBorderRadius: number) {
     this._borderRadius = aBorderRadius;
@@ -160,6 +168,14 @@ class PGShape {
 
   public set label(aLabel: string) {
     this._label = aLabel;
+  }
+
+  public set x(newX: number) {
+    this._pos.x = newX;
+  }
+
+  public set y(newY: number) {
+    this._pos.y = newY;
   }
 
   public setStroke(strokeWidth: number): void;
