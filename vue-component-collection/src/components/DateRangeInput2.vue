@@ -143,6 +143,10 @@ onMounted(() => {
   scrollBoxRight.value.box.setStroke(1, createColour("GREYSCALE", 0));
 
   canvas.value.render(true);
+
+  // Resize observer
+  const RESIZE_OBSERVER = new ResizeObserver(adjustWidth);
+  RESIZE_OBSERVER.observe(parentElement.value!);
 });
 </script>
 
