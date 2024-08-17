@@ -1,4 +1,4 @@
-import { PGCanvas, PGShape } from "./GoodCanvas/index";
+import { createColour, PGCanvas, PGShape } from "./GoodCanvas/index";
 import Month from "./Month";
 
 class Year {
@@ -56,6 +56,9 @@ class Year {
     if (displayFineness.has("years")) {
       if (!this._square) {
         this._square = canvas.createRect(x, y, this._width, this._unitSize);
+        this._square.colour = createColour("RGB", 225, 0, 33);
+        this._square.setStroke(1, createColour("GREYSCALE", 0));
+        this._square.borderRadius = this._unitSize / 3;
       } else {
         this._square.x = x;
         this._square.y = y;
@@ -63,14 +66,11 @@ class Year {
     } else {
       this._square = null;
     }
+    let monthX = this._square!.x;
     if (displayFineness.has("months")) {
-      this._months.forEach((month, index) => {
-        month.display(
-          x + this._unitSize * index,
-          y - this._unitSize,
-          canvas,
-          displayFineness
-        );
+      this._months.forEach((month) => {
+        month.display(monthX, y - this._unitSize, canvas, displayFineness);
+        monthX += month.width;
       });
     } else if (displayFineness.has("days")) {
       this._months.forEach((month) => {

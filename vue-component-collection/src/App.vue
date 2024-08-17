@@ -13,6 +13,7 @@ import DateRangeInput2 from "./components/DateRangeInput2.vue";
   <h3>Second attempt</h3>
   <DateRangeInput2
     :display-fineness="['months', 'days', 'years']"
+    :unit-size="16"
   ></DateRangeInput2>
 </template>
 

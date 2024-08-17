@@ -486,9 +486,10 @@ class PGCanvas {
    * @returns {PGVector}
    */
   private calculateMousePosition(event: MouseEvent): PGVector {
+    const CANVAS_BOUNDING_RECT = this.canvas.getBoundingClientRect();
     return new PGVector(
-      event.clientX - this.canvas.clientLeft,
-      event.clientY - this.canvas.clientTop
+      Math.floor(event.clientX - CANVAS_BOUNDING_RECT.x),
+      Math.floor(event.clientY - CANVAS_BOUNDING_RECT.y)
     );
   }
 
@@ -502,9 +503,11 @@ class PGCanvas {
   get runtimeFrameRate(): number {
     return this._runtimeFrameRate;
   }
-
   get framCount(): number {
     return this._frameCount;
+  }
+  get mousePos(): PGVector {
+    return this._mouseHistory[0].clone();
   }
   get width(): number {
     return this.canvasSize.w;

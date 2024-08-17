@@ -1,5 +1,5 @@
 import Day from "./Day";
-import { PGCanvas, PGShape } from "./GoodCanvas/index";
+import { createColour, PGCanvas, PGShape } from "./GoodCanvas/index";
 import { _daysIn } from "./supportFunctions";
 
 class Month {
@@ -22,7 +22,7 @@ class Month {
 
     const FIRST_DAY: Day = (() => {
       if (month === startDate.getMonth() && year === startDate.getFullYear()) {
-        return new Day(startDate.getDate(), unitSize);
+        return new Day(startDate.getDate() - 1, unitSize);
       }
       return new Day(0, unitSize);
     })();
@@ -31,7 +31,7 @@ class Month {
     const NUMBER_OF_DAYS: number = (() => {
       let dayNumber = _daysIn(this._month[0], this._month[1]);
       if (month === startDate.getMonth() && year === startDate.getFullYear()) {
-        dayNumber -= startDate.getDate();
+        dayNumber -= startDate.getDate() - 1;
       }
       if (month === endDate.getMonth() && year === endDate.getFullYear()) {
         dayNumber -= dayNumber - endDate.getDate();
@@ -57,8 +57,11 @@ class Month {
     displayFineness: Set<"days" | "months" | "years">
   ) {
     if (displayFineness.has("months")) {
-      if (!this._square) {
+      if (this._square === undefined || this._square === null) {
         this._square = canvas.createRect(x, y, this._width, this._unitSize);
+        this._square.colour = createColour("RGB", 33, 200, 192);
+        this._square.setStroke(1, createColour("GREYSCALE", 0));
+        this._square.borderRadius = this._unitSize / 3;
       } else {
         this._square.x = x;
         this._square.y = y;

@@ -37,6 +37,9 @@ class PGVector {
   clone() {
     return new PGVector(this.arrayVector);
   }
+  toString(): string {
+    return `[${this.arrayVector[0]}, ${this.arrayVector[1]}]`;
+  }
   set x(newX: number) {
     this.arrayVector[0] = newX;
   }

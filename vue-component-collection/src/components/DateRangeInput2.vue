@@ -102,6 +102,30 @@ onMounted(() => {
     h: canvas.value.height,
   };
 
+  let yearX = scrollBoxSize.value.w;
+  YEAR_ARRAY.forEach((year) => {
+    year.display(
+      yearX,
+      props.unitSize * 2,
+      canvas.value!,
+      new Set(props.displayFineness)
+    );
+    yearX += year.width;
+  });
+
+  // YEAR_ARRAY[0].display(
+  //   scrollBoxSize.value!.w,
+  //   props.unitSize * 2,
+  //   canvas.value!,
+  //   new Set(props.displayFineness)
+  // );
+  // YEAR_ARRAY[0].months[0].display(
+  //   scrollBoxSize.value.w,
+  //   props.unitSize,
+  //   canvas.value,
+  //   new Set(props.displayFineness)
+  // );
+
   scrollBoxLeft.value = {
     box: canvas.value.createRect(
       0,
