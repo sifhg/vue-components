@@ -17,8 +17,15 @@ class Year {
     this._year = year;
     this._months = (() => {
       const MONTHS_ARRAY: Month[] = [];
-      let iDate = new Date(startDate.getFullYear(), startDate.getMonth());
-      while (iDate <= endDate) {
+      let iDate: Date;
+      if (this._year === startDate.getFullYear()) {
+        iDate = new Date(this._year, startDate.getMonth());
+      } else {
+        iDate = new Date(this._year, 0);
+      }
+      do {
+        console.log(iDate.getMonth());
+        console.log(typeof iDate.getMonth());
         MONTHS_ARRAY.push(
           new Month(
             iDate.getMonth(),
@@ -29,7 +36,7 @@ class Year {
           )
         );
         iDate.setMonth(iDate.getMonth() + 1);
-      }
+      } while (iDate <= endDate && iDate.getMonth() !== 0);
       return MONTHS_ARRAY;
     })();
 
@@ -77,6 +84,9 @@ class Year {
 
   public get year(): number {
     return this._year;
+  }
+  public get months(): Month[] {
+    return [...this._months];
   }
   public get width(): number {
     return this._width;

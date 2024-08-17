@@ -1,23 +1,23 @@
 import Year from "./Year";
 
 export function _daysIn(year: number): number;
-export function _daysIn(year: number, month: number): number;
+export function _daysIn(month: number, year: number): number;
 export function _daysIn(arg0: number, arg1?: number): number {
   let firstDay: number;
   let lastDay: number;
   if (arg1) {
-    if (arg1 >= 12 || arg1 < 0) {
+    if (arg0 >= 12 || arg0 < 0) {
       throw new Error(
-        `month parameter is ${arg1}. It must be a non-negative integer less than 12.`
+        `month parameter is ${arg0}. It must be a non-negative integer less than 12.`
       );
     }
-    firstDay = new Date(arg0, arg1).getTime();
-    lastDay = new Date(arg0, arg1 + 1).getTime();
+    firstDay = new Date(arg1, arg0).getTime();
+    lastDay = new Date(arg1, arg0 + 1).getTime();
   } else {
     firstDay = new Date(Number(arg0), 0).getTime();
     lastDay = new Date(Number(arg0) + 1, 0).getTime();
   }
-  return (lastDay - firstDay) / 86400000;
+  return Math.floor((lastDay - firstDay) / 86400000);
 }
 
 export function _dateAddition(
@@ -117,7 +117,7 @@ export function _getYearArray(
   displayFineness: Array<"days" | "months" | "years">
 ): Array<Year> {
   const YEAR_ARRAY: Array<Year> = [];
-  for (let y = firstDate.getFullYear(); y < lastDate.getFullYear(); y++) {
+  for (let y = firstDate.getFullYear(); y <= lastDate.getFullYear(); y++) {
     YEAR_ARRAY.push(
       new Year(y, firstDate, lastDate, unitSize, displayFineness)
     );

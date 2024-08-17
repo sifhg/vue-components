@@ -9,13 +9,16 @@ class Month {
   private _unitSize: number;
   private _square: PGShape | undefined | null;
   constructor(
-    month: number,
+    month: number = 0,
     year: number,
     startDate: Date,
     endDate: Date,
     unitSize: number
   ) {
     this._month = [month, year];
+    if (this._month[0] === undefined) {
+      this._month[0] = 0;
+    }
 
     const FIRST_DAY: Day = (() => {
       if (month === startDate.getMonth() && year === startDate.getFullYear()) {
@@ -26,7 +29,7 @@ class Month {
 
     this._days = [FIRST_DAY];
     const NUMBER_OF_DAYS: number = (() => {
-      let dayNumber = _daysIn(year, month);
+      let dayNumber = _daysIn(this._month[0], this._month[1]);
       if (month === startDate.getMonth() && year === startDate.getFullYear()) {
         dayNumber -= startDate.getDate();
       }
@@ -66,6 +69,10 @@ class Month {
         day.display(x + this._unitSize * index, y - this._unitSize, canvas);
       });
     }
+  }
+
+  public toString(): [string, object] {
+    return [`[${this._month[0]}, ${this._month[1]}]`, { days: this._days }];
   }
 
   public get days(): Array<Day> {

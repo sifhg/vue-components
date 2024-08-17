@@ -13,7 +13,6 @@ import {
   _dateSubtraction,
   _getYearArray,
 } from "./DateRangeInput2/supportFunctions";
-import Year from "./DateRangeInput2/Year";
 
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
@@ -47,7 +46,11 @@ const YEAR_ARRAY = _getYearArray(
 );
 console.log(FIRST_DATE);
 console.log(props.lastDate);
-console.log(YEAR_ARRAY);
+YEAR_ARRAY.forEach((year) => {
+  year.months.forEach((month) => {
+    console.log(month.toString());
+  });
+});
 
 // Canvas state
 const canvas = ref<PGCanvas>();
