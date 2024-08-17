@@ -82,3 +82,5 @@ class Year {
     return this._width;
   }
 }
+
+export default Year;

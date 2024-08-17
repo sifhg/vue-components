@@ -8,11 +8,18 @@ import {
   createVectorArray,
 } from "./DateRangeInput2/GoodCanvas/index";
 import { Size } from "./DateRangeInput2/GoodCanvas/types";
+import {
+  _dateAddition,
+  _dateSubtraction,
+  _getYearArray,
+} from "./DateRangeInput2/supportFunctions";
+import Year from "./DateRangeInput2/Year";
 
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
   width?: number;
   unitSize?: number;
+  firstDate?: Date;
   lastDate?: Date;
 };
 const props = withDefaults(defineProps<DateRangeInputProps>(), {
@@ -29,6 +36,18 @@ type ScrollBox = {
 
 const width = ref<number | undefined>(props.width);
 const parentElement = ref<HTMLElement | null>();
+const FIRST_DATE = props.firstDate
+  ? props.firstDate
+  : _dateSubtraction(props.lastDate, "1y");
+const YEAR_ARRAY = _getYearArray(
+  FIRST_DATE,
+  props.lastDate,
+  props.unitSize,
+  props.displayFineness
+);
+console.log(FIRST_DATE);
+console.log(props.lastDate);
+console.log(YEAR_ARRAY);
 
 // Canvas state
 const canvas = ref<PGCanvas>();
@@ -152,5 +171,4 @@ onMounted(() => {
 
 <template>
   <canvas id="date-selection-canvas"></canvas>
-  <p @click="adjustWidth">{{ width }}</p>
 </template>

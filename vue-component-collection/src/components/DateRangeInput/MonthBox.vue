@@ -80,9 +80,6 @@ const DAY_LIST: Array<number> = (() => {
   }
   return dayArray;
 })();
-
-console.log(numberOfDays.value);
-console.log(DAY_LIST);
 </script>
 
 <template>
