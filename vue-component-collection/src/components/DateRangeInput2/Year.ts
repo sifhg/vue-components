@@ -24,8 +24,6 @@ class Year {
         iDate = new Date(this._year, 0);
       }
       do {
-        console.log(iDate.getMonth());
-        console.log(typeof iDate.getMonth());
         MONTHS_ARRAY.push(
           new Month(
             iDate.getMonth(),

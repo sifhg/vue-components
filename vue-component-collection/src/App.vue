@@ -4,7 +4,7 @@ import DateRangeInput2 from "./components/DateRangeInput2.vue";
 </script>
 
 <template>
-  <h1>Vue Component COllection</h1>
+  <h1>Vue Component Collection</h1>
   <p>Written by <em>Sif Høg-Getgood</em></p>
   <p>This is a collection of vue components I've created.</p>
   <h2>Date Range Input</h2>

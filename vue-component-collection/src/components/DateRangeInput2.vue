@@ -74,13 +74,6 @@ const YEAR_ARRAY = _getYearArray(
   props.unitSize,
   props.displayFineness
 );
-console.log(FIRST_DATE);
-console.log(props.lastDate);
-YEAR_ARRAY.forEach((year) => {
-  year.months.forEach((month) => {
-    console.log(month.toString());
-  });
-});
 
 // Canvas state
 const canvas = ref<PGCanvas>();
