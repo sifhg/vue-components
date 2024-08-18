@@ -6,7 +6,7 @@ class Year {
   private _months: Month[];
   private _width: number;
   private _unitSize: number;
-  private _square: PGShape | undefined | null;
+  private _PGsquare: PGShape | undefined | null;
   constructor(
     year: number,
     startDate: Date,
@@ -52,19 +52,19 @@ class Year {
     displayFineness: Set<"days" | "months" | "years">
   ) {
     if (displayFineness.has("years")) {
-      if (!this._square) {
-        this._square = canvas.createRect(x, y, this._width, this._unitSize);
-        this._square.colour = createColour("RGB", 225, 0, 33);
-        this._square.setStroke(1, createColour("GREYSCALE", 0));
-        this._square.borderRadius = this._unitSize / 3;
+      if (!this._PGsquare) {
+        this._PGsquare = canvas.createRect(x, y, this._width, this._unitSize);
+        this._PGsquare.colour = createColour("RGB", 225, 0, 33);
+        this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+        this._PGsquare.borderRadius = this._unitSize / 3;
       } else {
-        this._square.x = x;
-        this._square.y = y;
+        this._PGsquare.x = x;
+        this._PGsquare.y = y;
       }
     } else {
-      this._square = null;
+      this._PGsquare = null;
     }
-    let monthX = this._square!.x;
+    let monthX = this._PGsquare!.x;
     if (displayFineness.has("months")) {
       this._months.forEach((month) => {
         month.display(monthX, y - this._unitSize, canvas, displayFineness);
@@ -80,14 +80,20 @@ class Year {
     canvas.render(true);
   }
 
-  public get year(): number {
-    return this._year;
-  }
   public get months(): Month[] {
     return [...this._months];
   }
   public get width(): number {
     return this._width;
+  }
+  public get x(): number {
+    if (this._PGsquare) {
+      return this._PGsquare.x;
+    }
+    throw new Error(`This Year instance has no PGShape member.`);
+  }
+  public get year(): number {
+    return this._year;
   }
 }
 

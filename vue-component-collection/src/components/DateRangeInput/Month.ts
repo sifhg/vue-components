@@ -7,7 +7,7 @@ class Month {
   private _days: Day[];
   private _width: number;
   private _unitSize: number;
-  private _square: PGShape | undefined | null;
+  private _PGsquare: PGShape | undefined | null;
   constructor(
     month: number = 0,
     year: number,
@@ -57,14 +57,14 @@ class Month {
     displayFineness: Set<"days" | "months" | "years">
   ) {
     if (displayFineness.has("months")) {
-      if (this._square === undefined || this._square === null) {
-        this._square = canvas.createRect(x, y, this._width, this._unitSize);
-        this._square.colour = createColour("RGB", 33, 200, 192);
-        this._square.setStroke(1, createColour("GREYSCALE", 0));
-        this._square.borderRadius = this._unitSize / 3;
+      if (this._PGsquare === undefined || this._PGsquare === null) {
+        this._PGsquare = canvas.createRect(x, y, this._width, this._unitSize);
+        this._PGsquare.colour = createColour("RGB", 33, 200, 192);
+        this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+        this._PGsquare.borderRadius = this._unitSize / 3;
       } else {
-        this._square.x = x;
-        this._square.y = y;
+        this._PGsquare.x = x;
+        this._PGsquare.y = y;
       }
     }
     if (displayFineness.has("days")) {
@@ -81,8 +81,17 @@ class Month {
   public get days(): Array<Day> {
     return [...this._days];
   }
+  public get month(): [number, number] {
+    return [...this._month];
+  }
   public get width(): number {
     return this._width;
+  }
+  public get x(): number {
+    if (this._PGsquare) {
+      return this._PGsquare.x;
+    }
+    throw new Error(`This Month instance has no PGShape member.`);
   }
 }
 

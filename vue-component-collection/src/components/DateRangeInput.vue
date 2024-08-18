@@ -14,6 +14,9 @@ import {
   _dateSubtraction,
   _getYearArray,
 } from "./DateRangeInput/supportFunctions";
+import Year from "./DateRangeInput/Year";
+import Month from "./DateRangeInput/Month";
+import Day from "./DateRangeInput/Day";
 
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
@@ -209,6 +212,48 @@ onMounted(() => {
   RESIZE_OBSERVER.observe(parentElement.value!);
 
   // Mouse position
+  function searchYearPosition(mouseX: number): Year {
+    for (const YEAR of YEAR_ARRAY) {
+      const X_INITIAL = YEAR.x;
+      const X_TERMINAL = X_INITIAL + YEAR.width;
+      if (mouseX >= X_INITIAL && mouseX <= X_TERMINAL) {
+        return YEAR;
+      }
+    }
+    throw new Error(
+      `Position ${mouseX} does not correspond to a position of a PGShape of a Year.`
+    );
+  }
+  function searchMonthPosition(mouseX: number, year?: Year): Month {
+    const YEAR = year ?? searchYearPosition(mouseX);
+    for (const MONTH of YEAR.months) {
+      const X_INITIAL = MONTH.x;
+      const X_TERMINAL = X_INITIAL + MONTH.width;
+      if (mouseX >= X_INITIAL && mouseX <= X_TERMINAL) {
+        return MONTH;
+      }
+    }
+    throw new Error(
+      `Position ${mouseX} does not correspond to a position of a PGShape of a Month.`
+    );
+  }
+  function searchDayPosition(mouseX: number, monthYear?: Month | Year): Day {
+    const MONTH =
+      monthYear instanceof Month
+        ? monthYear
+        : searchMonthPosition(mouseX, monthYear);
+    for (const DAY of MONTH.days) {
+      const X_INITIAL = DAY.x;
+      const X_TERMINAL = X_INITIAL + DAY.width;
+      if (mouseX >= X_INITIAL && mouseX <= X_TERMINAL) {
+        return DAY;
+      }
+    }
+    throw new Error(
+      `Position ${mouseX} does not correspond to a position of a PGShape of a Day.`
+    );
+  }
+
   function handleMousePosition(): void {
     const POSITION =
       canvas.value?.mousePos.clone() ?? mousePositionState.value.pos.clone();
@@ -259,38 +304,38 @@ onMounted(() => {
       };
       return;
     }
-    const YEAR = new Date().getFullYear(); //complete later
+    const YEAR = searchYearPosition(POSITION.x);
     if (depth === "years") {
       mousePositionState.value = {
         pos: POSITION,
         canvas: true,
         scroll: SCROLL_HOVER,
         layer: "year",
-        year: YEAR,
+        year: YEAR.year,
       };
       return;
     }
-    const MONTH = new Date().getMonth(); //complete later
+    const MONTH = searchMonthPosition(POSITION.x, YEAR);
     if (depth === "months") {
       mousePositionState.value = {
         pos: POSITION,
         canvas: true,
         scroll: SCROLL_HOVER,
         layer: "month",
-        year: YEAR,
-        month: MONTH,
+        year: YEAR.year,
+        month: MONTH.month[0],
       };
       return;
     }
-    const DAY = new Date().getDate(); //complete later
+    const DAY = searchDayPosition(POSITION.x, MONTH);
     mousePositionState.value = {
       pos: POSITION,
       canvas: true,
       scroll: SCROLL_HOVER,
       layer: "day",
-      year: YEAR,
-      month: MONTH,
-      day: DAY,
+      year: YEAR.year,
+      month: MONTH.month[0],
+      day: DAY.day,
     };
     return;
   }
@@ -304,7 +349,14 @@ onMounted(() => {
   canvas.value.HTMLElement.addEventListener("mousemove", () => {
     handleMousePosition();
     if (mousePositionState.value.canvas) {
-      console.log(mousePositionState.value.layer);
+      switch (mousePositionState.value.layer) {
+        case "day":
+          console.log(`day: ${mousePositionState.value.day}`);
+        case "month":
+          console.log(`month: ${mousePositionState.value.month}`);
+        case "year":
+          console.log(`year: ${mousePositionState.value.year}`);
+      }
     }
   });
 });
