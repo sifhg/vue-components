@@ -4,6 +4,7 @@ import {
   PGCanvas,
   PGColour,
   PGShape,
+  PGVector,
   createColour,
   createVectorArray,
 } from "./DateRangeInput2/GoodCanvas/index";
@@ -33,6 +34,35 @@ type ScrollBox = {
   arrow: PGShape;
 };
 
+type NoLayer = {
+  layer: false;
+};
+type YearLayer = {
+  layer: "year";
+  year: number;
+};
+type MonthLayer = {
+  layer: "month";
+  year: number;
+  month: number;
+};
+type DayLayer = {
+  layer: "day";
+  year: number;
+  month: number;
+  day: number;
+};
+type OffCanvas = {
+  canvas: false;
+};
+type OnCanvas = {
+  canvas: true;
+  scroll: { left: boolean; right: boolean };
+} & (NoLayer | YearLayer | MonthLayer | DayLayer);
+type PositionState = {
+  pos: PGVector;
+} & (OffCanvas | OnCanvas);
+
 const width = ref<number | undefined>(props.width);
 const parentElement = ref<HTMLElement | null>();
 const FIRST_DATE = props.firstDate
@@ -57,6 +87,10 @@ const canvas = ref<PGCanvas>();
 const scrollBoxLeft = ref<ScrollBox>();
 const scrollBoxRight = ref<ScrollBox>();
 const scrollBoxSize = ref<Size>();
+const mousePositionState = ref<PositionState>({
+  pos: canvas.value?.mousePos ?? new PGVector(0, 0),
+  canvas: false,
+});
 
 function adjustWidth() {
   if (
@@ -112,19 +146,6 @@ onMounted(() => {
     );
     yearX += year.width;
   });
-
-  // YEAR_ARRAY[0].display(
-  //   scrollBoxSize.value!.w,
-  //   props.unitSize * 2,
-  //   canvas.value!,
-  //   new Set(props.displayFineness)
-  // );
-  // YEAR_ARRAY[0].months[0].display(
-  //   scrollBoxSize.value.w,
-  //   props.unitSize,
-  //   canvas.value,
-  //   new Set(props.displayFineness)
-  // );
 
   scrollBoxLeft.value = {
     box: canvas.value.createRect(
@@ -193,6 +214,106 @@ onMounted(() => {
   // Resize observer
   const RESIZE_OBSERVER = new ResizeObserver(adjustWidth);
   RESIZE_OBSERVER.observe(parentElement.value!);
+
+  // Mouse position
+  function handleMousePosition(): void {
+    const POSITION =
+      canvas.value?.mousePos.clone() ?? mousePositionState.value.pos.clone();
+    const SCROLL_HOVER = {
+      left: (() => {
+        return POSITION.x < scrollBoxSize.value!.w;
+      })(),
+      right: (() => {
+        return (
+          POSITION.x > scrollBoxRight.value!.box.x &&
+          POSITION.x < canvas.value!.width
+        );
+      })(),
+    };
+    let depth: false | "days" | "months" | "years";
+    function compareFinenes(
+      a: "days" | "months" | "years",
+      b: "days" | "months" | "years"
+    ): number {
+      if (a === b) {
+        return 0;
+      }
+      if (a === "days" || b === "years") {
+        return -1;
+      }
+      return 1;
+    }
+    if (SCROLL_HOVER.left || SCROLL_HOVER.right) {
+      depth = false;
+    } else {
+      if (POSITION.y < canvas.value!.height / props.displayFineness.length) {
+        depth = props.displayFineness.sort(compareFinenes)[0];
+      } else if (
+        POSITION.y <
+        (canvas.value!.height * 2) / props.displayFineness.length
+      ) {
+        depth = props.displayFineness.sort(compareFinenes)[1];
+      } else {
+        depth = props.displayFineness.sort(compareFinenes)[2];
+      }
+    }
+    if (!depth) {
+      mousePositionState.value = {
+        pos: POSITION,
+        canvas: true,
+        scroll: SCROLL_HOVER,
+        layer: false,
+      };
+      return;
+    }
+    const YEAR = new Date().getFullYear(); //complete later
+    if (depth === "years") {
+      mousePositionState.value = {
+        pos: POSITION,
+        canvas: true,
+        scroll: SCROLL_HOVER,
+        layer: "year",
+        year: YEAR,
+      };
+      return;
+    }
+    const MONTH = new Date().getMonth(); //complete later
+    if (depth === "months") {
+      mousePositionState.value = {
+        pos: POSITION,
+        canvas: true,
+        scroll: SCROLL_HOVER,
+        layer: "month",
+        year: YEAR,
+        month: MONTH,
+      };
+      return;
+    }
+    const DAY = new Date().getDate(); //complete later
+    mousePositionState.value = {
+      pos: POSITION,
+      canvas: true,
+      scroll: SCROLL_HOVER,
+      layer: "day",
+      year: YEAR,
+      month: MONTH,
+      day: DAY,
+    };
+    return;
+  }
+  canvas.value.HTMLElement.addEventListener("mouseleave", () => {
+    mousePositionState.value = {
+      ...mousePositionState.value,
+      canvas: false,
+    };
+    console.log(mousePositionState.value.canvas);
+  });
+  canvas.value.HTMLElement.addEventListener("mousemove", () => {
+    handleMousePosition();
+    if (mousePositionState.value.canvas) {
+      console.log(mousePositionState.value.layer);
+    }
+  });
 });
 </script>
 

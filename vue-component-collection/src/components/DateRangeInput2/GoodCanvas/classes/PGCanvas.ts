@@ -9,7 +9,7 @@ import { PGVector } from "./PGVector.js";
  */
 class PGCanvas {
   private shapes: Array<PGShape>;
-  private canvas: HTMLCanvasElement;
+  private _canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private canvasSize: Size;
   private backgroundColour: PGColour | undefined;
@@ -38,18 +38,18 @@ class PGCanvas {
       const NEW_CANVAS = document.createElement("canvas");
       NEW_CANVAS.id = canvasID;
       document.getElementsByTagName("body")[0].appendChild(NEW_CANVAS);
-      this.canvas = NEW_CANVAS;
+      this._canvas = NEW_CANVAS;
     } else if (CANVAS.tagName !== "CANVAS") {
       throw new Error(
         `HTML element of id ${canvasID} bust be a canvas element. HTML element of id is a "${CANVAS.tagName}" element`
       );
     } else {
-      this.canvas = <HTMLCanvasElement>CANVAS;
+      this._canvas = <HTMLCanvasElement>CANVAS;
     }
-    this.ctx = <CanvasRenderingContext2D>this.canvas.getContext("2d");
+    this.ctx = <CanvasRenderingContext2D>this._canvas.getContext("2d");
     this.canvasSize = {
-      w: this.canvas.width,
-      h: this.canvas.height,
+      w: this._canvas.width,
+      h: this._canvas.height,
     };
     this._frameRate = 30;
     this._runtimeFrameRate = this._frameRate;
@@ -67,8 +67,8 @@ class PGCanvas {
       w: w,
       h: h,
     };
-    this.canvas.width = w;
-    this.canvas.height = h;
+    this._canvas.width = w;
+    this._canvas.height = h;
   }
 
   /**
@@ -486,7 +486,7 @@ class PGCanvas {
    * @returns {PGVector}
    */
   private calculateMousePosition(event: MouseEvent): PGVector {
-    const CANVAS_BOUNDING_RECT = this.canvas.getBoundingClientRect();
+    const CANVAS_BOUNDING_RECT = this._canvas.getBoundingClientRect();
     return new PGVector(
       Math.floor(event.clientX - CANVAS_BOUNDING_RECT.x),
       Math.floor(event.clientY - CANVAS_BOUNDING_RECT.y)
@@ -499,6 +499,9 @@ class PGCanvas {
   }
   get frameRate(): number {
     return this._frameRate;
+  }
+  get HTMLElement(): HTMLCanvasElement {
+    return this._canvas;
   }
   get runtimeFrameRate(): number {
     return this._runtimeFrameRate;
