@@ -1,3 +1,5 @@
+import Year from "./Year";
+
 export function _daysIn(year: number): number;
 export function _daysIn(month: number, year: number): number;
 export function _daysIn(arg0: number, arg1?: number): number {
@@ -15,7 +17,7 @@ export function _daysIn(arg0: number, arg1?: number): number {
     firstDay = new Date(Number(arg0), 0).getTime();
     lastDay = new Date(Number(arg0) + 1, 0).getTime();
   }
-  return (lastDay - firstDay) / 86400000;
+  return Math.floor((lastDay - firstDay) / 86400000);
 }
 
 export function _dateAddition(
@@ -50,31 +52,28 @@ export function _dateAddition(
 
 export function _dateSubtraction(
   date: Date,
-  addend: `${number}${" " | ""}${"d" | "m" | "y"}`
+  subtrahend: `${number}${" " | ""}${"d" | "m" | "y"}`
 ): Date {
-  if (addend.includes("d")) {
+  if (subtrahend.includes("d")) {
     return new Date(
       date.getFullYear(),
       date.getMonth(),
-      date.getDate() - Number(addend.split(/sa-z/)[0])
+      date.getDate() - Number(subtrahend.split(/[mdy ]/)[0])
     );
   }
-  if (addend.includes("m")) {
+  if (subtrahend.includes("m")) {
     return new Date(
       date.getFullYear(),
-      date.getMonth() - Number(addend.split(/sa-z/)[0]),
+      date.getMonth() - Number(subtrahend.split(/[mdy ]/)[0]),
       date.getDate()
     );
   }
-  if (addend.includes("y")) {
-    return new Date(
-      date.getFullYear() - Number(addend.split(/sa-z/)[0]),
-      date.getMonth(),
-      date.getDate()
-    );
+  if (subtrahend.includes("y")) {
+    const NEW_YEAR = date.getFullYear() - Number(subtrahend.split(/[mdy ]/)[0]);
+    return new Date(NEW_YEAR, date.getMonth(), date.getDate());
   }
   throw new Error(
-    `function: _dateAddition. addend must have a unit matching "d", "m", or "y"`
+    `function: _dateSubtraction. subtracted must have a unit matching "d", "m", or "y"`
   );
 }
 
@@ -109,4 +108,19 @@ export function _monthString(monthNumber: number): string {
         `_monthString: input must be a number more than or equal 1, and less than or equal 12. Input was "${monthNumber}"`
       );
   }
+}
+
+export function _getYearArray(
+  firstDate: Date,
+  lastDate: Date,
+  unitSize: number,
+  displayFineness: Array<"days" | "months" | "years">
+): Array<Year> {
+  const YEAR_ARRAY: Array<Year> = [];
+  for (let y = firstDate.getFullYear(); y <= lastDate.getFullYear(); y++) {
+    YEAR_ARRAY.push(
+      new Year(y, firstDate, lastDate, unitSize, displayFineness)
+    );
+  }
+  return YEAR_ARRAY;
 }
