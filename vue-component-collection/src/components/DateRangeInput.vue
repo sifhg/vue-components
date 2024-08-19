@@ -8,7 +8,11 @@ import {
   createColour,
   createVectorArray,
 } from "./DateRangeInput/GoodCanvas/index";
-import { Size } from "./DateRangeInput/GoodCanvas/types";
+import {
+  ArrayVector,
+  Coordinate,
+  Size,
+} from "./DateRangeInput/GoodCanvas/types";
 import {
   _dateAddition,
   _dateSubtraction,
@@ -21,12 +25,14 @@ import Day from "./DateRangeInput/Day";
 type DateRangeInputProps = {
   displayFineness: Array<"days" | "months" | "years">;
   width?: number;
-  unitSize?: number;
+  unitSize?: Coordinate | ArrayVector;
   firstDate?: Date;
   lastDate?: Date;
 };
 const props = withDefaults(defineProps<DateRangeInputProps>(), {
-  unitSize: 32,
+  unitSize: () => {
+    return [32, 32];
+  },
   lastDate: () => {
     return new Date();
   },
@@ -68,13 +74,14 @@ type PositionState = {
 
 const width = ref<number | undefined>(props.width);
 const parentElement = ref<HTMLElement | null>();
+const unitSize = ref(new PGVector(props.unitSize));
 const FIRST_DATE = props.firstDate
   ? props.firstDate
   : _dateSubtraction(props.lastDate, "1y");
 const YEAR_ARRAY = _getYearArray(
   FIRST_DATE,
   props.lastDate,
-  props.unitSize,
+  unitSize.value.clone(),
   props.displayFineness
 );
 
@@ -124,11 +131,11 @@ onMounted(() => {
   canvas.value = new PGCanvas("date-selection-canvas");
   canvas.value.setCanvasSize(
     width.value!,
-    props.unitSize * props.displayFineness.length
+    unitSize.value.y * props.displayFineness.length
   );
-  canvas.value.background(new PGColour("GREYSCALE", 207));
+  canvas.value.background(new PGColour("GREYSCALE", 255));
   scrollBoxSize.value = {
-    w: props.unitSize * 2,
+    w: unitSize.value.y * 2,
     h: canvas.value.height,
   };
 
@@ -136,7 +143,7 @@ onMounted(() => {
   YEAR_ARRAY.forEach((year) => {
     year.display(
       yearX,
-      props.unitSize * 2,
+      unitSize.value.y * 2,
       canvas.value!,
       new Set(props.displayFineness)
     );
@@ -155,16 +162,16 @@ onMounted(() => {
     arrow: canvas.value.createPath(
       createVectorArray([
         {
-          x: scrollBoxSize.value.w / 2 + props.unitSize / 4,
-          y: scrollBoxSize.value.h / 2 + props.unitSize / 2,
+          x: scrollBoxSize.value.w / 2 + unitSize.value.y / 4,
+          y: scrollBoxSize.value.h / 2 + unitSize.value.y / 2,
         },
         {
-          x: scrollBoxSize.value.w / 2 - props.unitSize / 4,
+          x: scrollBoxSize.value.w / 2 - unitSize.value.y / 4,
           y: scrollBoxSize.value.h / 2,
         },
         {
-          x: scrollBoxSize.value.w / 2 + props.unitSize / 4,
-          y: scrollBoxSize.value.h / 2 - props.unitSize / 2,
+          x: scrollBoxSize.value.w / 2 + unitSize.value.y / 4,
+          y: scrollBoxSize.value.h / 2 - unitSize.value.y / 2,
         },
       ]),
       createColour("GREYSCALE", 208),
@@ -185,18 +192,24 @@ onMounted(() => {
       createVectorArray([
         {
           x:
-            canvas.value.width - scrollBoxSize.value.w / 2 - props.unitSize / 4,
-          y: scrollBoxSize.value.h / 2 + props.unitSize / 2,
+            canvas.value.width -
+            scrollBoxSize.value.w / 2 -
+            unitSize.value.y / 4,
+          y: scrollBoxSize.value.h / 2 + unitSize.value.y / 2,
         },
         {
           x:
-            canvas.value.width - scrollBoxSize.value.w / 2 + props.unitSize / 4,
+            canvas.value.width -
+            scrollBoxSize.value.w / 2 +
+            unitSize.value.y / 4,
           y: scrollBoxSize.value.h / 2,
         },
         {
           x:
-            canvas.value.width - scrollBoxSize.value.w / 2 - props.unitSize / 4,
-          y: scrollBoxSize.value.h / 2 - props.unitSize / 2,
+            canvas.value.width -
+            scrollBoxSize.value.w / 2 -
+            unitSize.value.y / 4,
+          y: scrollBoxSize.value.h / 2 - unitSize.value.y / 2,
         },
       ]),
       createColour("GREYSCALE", 208),
@@ -356,6 +369,9 @@ onMounted(() => {
           console.log(`month: ${mousePositionState.value.month}`);
         case "year":
           console.log(`year: ${mousePositionState.value.year}`);
+          break;
+        default:
+          console.log(mousePositionState.value.layer);
       }
     }
   });

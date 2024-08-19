@@ -1,17 +1,17 @@
-import { createColour, PGCanvas, PGShape } from "./GoodCanvas/index";
+import { createColour, PGCanvas, PGShape, PGVector } from "./GoodCanvas/index";
 import Month from "./Month";
 
 class Year {
   private _year: number;
   private _months: Month[];
   private _width: number;
-  private _unitSize: number;
+  private _height: number;
   private _PGsquare: PGShape | undefined | null;
   constructor(
     year: number,
     startDate: Date,
     endDate: Date,
-    unitSize: number,
+    unitSize: PGVector,
     displayFineness?: Array<"days" | "months" | "years">
   ) {
     this._year = year;
@@ -39,10 +39,10 @@ class Year {
     })();
 
     this._width = 0;
-    this._unitSize = unitSize;
     this._months.forEach((MONTH) => {
       this._width += MONTH.width;
     });
+    this._height = unitSize.y;
   }
 
   public display(
@@ -53,10 +53,10 @@ class Year {
   ) {
     if (displayFineness.has("years")) {
       if (!this._PGsquare) {
-        this._PGsquare = canvas.createRect(x, y, this._width, this._unitSize);
+        this._PGsquare = canvas.createRect(x, y, this._width, this._height);
         this._PGsquare.colour = createColour("RGB", 225, 0, 33);
         this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
-        this._PGsquare.borderRadius = this._unitSize / 3;
+        this._PGsquare.borderRadius = this._height / 3;
       } else {
         this._PGsquare.x = x;
         this._PGsquare.y = y;
@@ -67,13 +67,13 @@ class Year {
     let monthX = this._PGsquare!.x;
     if (displayFineness.has("months")) {
       this._months.forEach((month) => {
-        month.display(monthX, y - this._unitSize, canvas, displayFineness);
+        month.display(monthX, y - this._height, canvas, displayFineness);
         monthX += month.width;
       });
     } else if (displayFineness.has("days")) {
       this._months.forEach((month) => {
         month.days.forEach((day, index) => {
-          day.display(x + this._unitSize * index, y - this._unitSize, canvas);
+          day.display(x + day.width * index, y - this._height, canvas);
         });
       });
     }

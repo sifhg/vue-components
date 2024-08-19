@@ -1,22 +1,22 @@
-import { createColour, PGCanvas, PGShape } from "./GoodCanvas";
+import { createColour, PGCanvas, PGShape, PGVector } from "./GoodCanvas";
 
 class Day {
   private _day: number;
   private _width: number;
-  private _unitSize: number;
+  private _height: number;
   private _PGsquare: PGShape | undefined | null;
-  constructor(day: number, unitSize: number) {
+  constructor(day: number, unitSize: PGVector) {
     this._day = day;
-    this._width = unitSize;
-    this._unitSize = unitSize;
+    this._width = unitSize.x;
+    this._height = unitSize.y;
   }
 
   public display(x: number, y: number, canvas: PGCanvas) {
     if (this._PGsquare === undefined || this._PGsquare === null) {
-      this._PGsquare = canvas.createRect(x, y, this._width, this._unitSize);
+      this._PGsquare = canvas.createRect(x, y, this._width, this._height);
       this._PGsquare.colour = createColour("GREYSCALE", 192);
       this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
-      this._PGsquare.borderRadius = this._unitSize / 3;
+      this._PGsquare.borderRadius = this._height / 3;
     } else {
       this._PGsquare.x = x;
       this._PGsquare.y = y;

@@ -1,3 +1,4 @@
+import { PGVector } from "./GoodCanvas";
 import Year from "./Year";
 
 export function _daysIn(year: number): number;
@@ -113,7 +114,7 @@ export function _monthString(monthNumber: number): string {
 export function _getYearArray(
   firstDate: Date,
   lastDate: Date,
-  unitSize: number,
+  unitSize: PGVector,
   displayFineness: Array<"days" | "months" | "years">
 ): Array<Year> {
   const YEAR_ARRAY: Array<Year> = [];

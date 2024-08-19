@@ -1,19 +1,19 @@
 import Day from "./Day";
-import { createColour, PGCanvas, PGShape } from "./GoodCanvas/index";
+import { createColour, PGCanvas, PGShape, PGVector } from "./GoodCanvas/index";
 import { _daysIn } from "./supportFunctions";
 
 class Month {
   private _month: [number, number];
   private _days: Day[];
   private _width: number;
-  private _unitSize: number;
+  private _height: number;
   private _PGsquare: PGShape | undefined | null;
   constructor(
     month: number = 0,
     year: number,
     startDate: Date,
     endDate: Date,
-    unitSize: number
+    unitSize: PGVector
   ) {
     this._month = [month, year];
     if (this._month[0] === undefined) {
@@ -47,7 +47,7 @@ class Month {
     this._days.forEach((DAY) => {
       this._width += DAY.width;
     });
-    this._unitSize = unitSize;
+    this._height = unitSize.y;
   }
 
   public display(
@@ -58,10 +58,10 @@ class Month {
   ) {
     if (displayFineness.has("months")) {
       if (this._PGsquare === undefined || this._PGsquare === null) {
-        this._PGsquare = canvas.createRect(x, y, this._width, this._unitSize);
+        this._PGsquare = canvas.createRect(x, y, this._width, this._height);
         this._PGsquare.colour = createColour("RGB", 33, 200, 192);
         this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
-        this._PGsquare.borderRadius = this._unitSize / 3;
+        this._PGsquare.borderRadius = this._height / 3;
       } else {
         this._PGsquare.x = x;
         this._PGsquare.y = y;
@@ -69,7 +69,7 @@ class Month {
     }
     if (displayFineness.has("days")) {
       this._days.forEach((day, index) => {
-        day.display(x + this._unitSize * index, y - this._unitSize, canvas);
+        day.display(x + day.width * index, y - this._height, canvas);
       });
     }
   }

@@ -9,7 +9,7 @@ import DateRangeInput from "./components/DateRangeInput.vue";
   <h2>Date Range Input</h2>
   <DateRangeInput
     :display-fineness="['months', 'days', 'years']"
-    :unit-size="16"
+    :unit-size="[8, 16]"
   ></DateRangeInput>
 </template>
 
