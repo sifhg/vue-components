@@ -73,6 +73,7 @@ type PositionState = {
 } & (OffCanvas | OnCanvas);
 
 const width = ref<number | undefined>(props.width);
+const offsetX = ref<number>(0);
 const parentElement = ref<HTMLElement | null>();
 const unitSize = ref(new PGVector(props.unitSize));
 const FIRST_DATE = props.firstDate
@@ -122,6 +123,17 @@ function adjustWidth() {
   );
   canvas.value?.render(true);
 }
+function displayDates(yearArray: Array<Year>, xStart: number) {
+  yearArray.forEach((year) => {
+    year.display(
+      xStart,
+      unitSize.value.y * 2,
+      canvas.value!,
+      new Set(props.displayFineness)
+    );
+    xStart += year.width;
+  });
+}
 
 onMounted(() => {
   parentElement.value = document.getElementById(
@@ -139,16 +151,7 @@ onMounted(() => {
     h: canvas.value.height,
   };
 
-  let yearX = scrollBoxSize.value.w;
-  YEAR_ARRAY.forEach((year) => {
-    year.display(
-      yearX,
-      unitSize.value.y * 2,
-      canvas.value!,
-      new Set(props.displayFineness)
-    );
-    yearX += year.width;
-  });
+  displayDates(YEAR_ARRAY, scrollBoxSize.value.w);
 
   scrollBoxLeft.value = {
     box: canvas.value.createRect(
@@ -266,7 +269,6 @@ onMounted(() => {
       `Position ${mouseX} does not correspond to a position of a PGShape of a Day.`
     );
   }
-
   function handleMousePosition(): void {
     const POSITION =
       canvas.value?.mousePos.clone() ?? mousePositionState.value.pos.clone();
@@ -352,6 +354,21 @@ onMounted(() => {
     };
     return;
   }
+  function handleScroll(step: number): void {
+    if (!mousePositionState.value.canvas) {
+      return;
+    }
+
+    if (mousePositionState.value.scroll.left) {
+      offsetX.value -= step;
+    }
+    if (mousePositionState.value.scroll.right) {
+      offsetX.value += step;
+    }
+    offsetX.value = offsetX.value < 0 ? 0 : offsetX.value;
+    displayDates(YEAR_ARRAY, scrollBoxSize.value!.w - offsetX.value);
+  }
+
   canvas.value.HTMLElement.addEventListener("mouseleave", () => {
     mousePositionState.value = {
       ...mousePositionState.value,
@@ -375,9 +392,16 @@ onMounted(() => {
       }
     }
   });
+  canvas.value.HTMLElement.addEventListener("click", () => {
+    handleScroll(5);
+  });
+  canvas.value.HTMLElement.addEventListener("mousedown", () => {
+    handleScroll(5);
+  });
 });
 </script>
 
 <template>
   <canvas id="date-selection-canvas"></canvas>
+  <p>{{ offsetX }}</p>
 </template>
