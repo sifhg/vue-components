@@ -115,13 +115,44 @@ export function _getYearArray(
   firstDate: Date,
   lastDate: Date,
   unitSize: PGVector,
+  xInitial: number,
+  xVisible0: number,
+  xVisible1: number,
   displayFineness: Array<"days" | "months" | "years">
 ): Array<Year> {
-  const YEAR_ARRAY: Array<Year> = [];
-  for (let y = firstDate.getFullYear(); y <= lastDate.getFullYear(); y++) {
-    YEAR_ARRAY.push(
-      new Year(y, firstDate, lastDate, unitSize, displayFineness)
+  const YEAR_ARRAY: Array<Year> = [
+    new Year(
+      firstDate.getFullYear(),
+      firstDate,
+      lastDate,
+      unitSize,
+      xInitial,
+      displayFineness
+    ),
+  ];
+
+  for (let y = firstDate.getFullYear() + 1; y <= lastDate.getFullYear(); y++) {
+    const PREVIOUS_YEAR = YEAR_ARRAY.slice(-1).pop();
+    const X = PREVIOUS_YEAR!.x + PREVIOUS_YEAR!.width;
+
+    if (X > xVisible1) {
+      return YEAR_ARRAY;
+    }
+
+    const NEXT_YEAR = new Year(
+      y,
+      firstDate,
+      lastDate,
+      unitSize,
+      X,
+      displayFineness
     );
+
+    if (X <= xVisible0) {
+      YEAR_ARRAY[YEAR_ARRAY.length - 1] = NEXT_YEAR;
+    } else {
+      YEAR_ARRAY.push(NEXT_YEAR);
+    }
   }
   return YEAR_ARRAY;
 }

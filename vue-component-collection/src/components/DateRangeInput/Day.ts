@@ -12,15 +12,10 @@ class Day {
   }
 
   public display(x: number, y: number, canvas: PGCanvas) {
-    if (this._PGsquare === undefined || this._PGsquare === null) {
-      this._PGsquare = canvas.createRect(x, y, this._width, this._height);
-      this._PGsquare.colour = createColour("GREYSCALE", 192);
-      this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
-      this._PGsquare.borderRadius = this._height / 3;
-    } else {
-      this._PGsquare.x = x;
-      this._PGsquare.y = y;
-    }
+    this._PGsquare = canvas.createRect(x, y, this._width, this._height);
+    this._PGsquare.colour = createColour("GREYSCALE", 192);
+    this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+    this._PGsquare.borderRadius = this._height / 3;
   }
 
   public get width(): number {

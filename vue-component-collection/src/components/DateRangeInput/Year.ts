@@ -4,6 +4,7 @@ import Month from "./Month";
 class Year {
   private _year: number;
   private _months: Month[];
+  private _x: number;
   private _width: number;
   private _height: number;
   private _PGsquare: PGShape | undefined | null;
@@ -12,6 +13,7 @@ class Year {
     startDate: Date,
     endDate: Date,
     unitSize: PGVector,
+    x: number,
     displayFineness?: Array<"days" | "months" | "years">
   ) {
     this._year = year;
@@ -38,6 +40,7 @@ class Year {
       return MONTHS_ARRAY;
     })();
 
+    this._x = x;
     this._width = 0;
     this._months.forEach((MONTH) => {
       this._width += MONTH.width;
@@ -45,39 +48,44 @@ class Year {
     this._height = unitSize.y;
   }
 
+  /**
+   * Update the PGsquare of this year and adds that PGsquare to the canvas. Also
+   * @param {PGCanvas} canvas - the canvas to which, the PGsquare will be added.
+   * @param {Set<"days" | "months" | "years">} displayFineness - a set of the categories of calendar entities you wish to display to the canvas.
+   */
   public display(
-    x: number,
-    y: number,
     canvas: PGCanvas,
     displayFineness: Set<"days" | "months" | "years">
   ) {
     if (displayFineness.has("years")) {
-      if (!this._PGsquare) {
-        this._PGsquare = canvas.createRect(x, y, this._width, this._height);
-        this._PGsquare.colour = createColour("RGB", 225, 0, 33);
-        this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
-        this._PGsquare.borderRadius = this._height / 3;
-      } else {
-        this._PGsquare.x = x;
-        this._PGsquare.y = y;
-      }
+      const X = this._x;
+      const Y = (displayFineness.size - 1) * this._height;
+
+      this._PGsquare = canvas.createRect(X, Y, this._width, this._height);
+      this._PGsquare.colour = createColour("RGB", 225, 0, 33);
+      this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+      this._PGsquare.borderRadius = this._height / 3;
     } else {
       this._PGsquare = null;
     }
     let monthX = this._PGsquare!.x;
-    if (displayFineness.has("months")) {
-      this._months.forEach((month) => {
-        month.display(monthX, y - this._height, canvas, displayFineness);
-        monthX += month.width;
-      });
-    } else if (displayFineness.has("days")) {
-      this._months.forEach((month) => {
-        month.days.forEach((day, index) => {
-          day.display(x + day.width * index, y - this._height, canvas);
-        });
-      });
-    }
+    // if (displayFineness.has("months")) {
+    //   this._months.forEach((month) => {
+    //     month.display(monthX, y - this._height, canvas, displayFineness);
+    //     monthX += month.width;
+    //   });
+    // } else if (displayFineness.has("days")) {
+    //   this._months.forEach((month) => {
+    //     month.days.forEach((day, index) => {
+    //       day.display(x + day.width * index, y - this._height, canvas);
+    //     });
+    //   });
+    // }
     canvas.render(true);
+  }
+
+  public destructSquare() {
+    this._PGsquare = undefined;
   }
 
   public get months(): Month[] {
@@ -87,13 +95,14 @@ class Year {
     return this._width;
   }
   public get x(): number {
-    if (this._PGsquare) {
-      return this._PGsquare.x;
-    }
-    throw new Error(`This Year instance has no PGShape member.`);
+    return this._x;
   }
   public get year(): number {
     return this._year;
+  }
+
+  public set x(newX: number) {
+    this._x = newX;
   }
 }
 
