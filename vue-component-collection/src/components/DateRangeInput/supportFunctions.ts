@@ -156,3 +156,30 @@ export function _getYearArray(
   }
   return YEAR_ARRAY;
 }
+
+/**
+ * Finds the cutoff index of an array where the elements are sorted from not passing to passing a pass function.
+ *
+ * @param {Array} array - An array sorted from not passing to passing a test.
+ * @param {Function} passFunction - A function that returns true if an element passes the test.
+ * @returns {number} - the first passing index of the funciton.
+ */
+export function _getCutoffIndex<T>(
+  array: Array<T>,
+  passFunction: (testElement: T) => boolean
+): number {
+  let maxIndex = array.length - 1;
+  let minIndex = 0;
+  if (maxIndex === 0) {
+    return 0;
+  }
+  while (maxIndex - minIndex !== 1) {
+    const AVERAGE_INDEX = Math.floor((maxIndex + minIndex) / 2);
+    if (passFunction(array[AVERAGE_INDEX])) {
+      maxIndex = AVERAGE_INDEX;
+    } else {
+      minIndex = AVERAGE_INDEX;
+    }
+  }
+  return maxIndex;
+}
