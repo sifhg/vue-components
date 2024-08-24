@@ -181,5 +181,8 @@ export function _getCutoffIndex<T>(
       minIndex = AVERAGE_INDEX;
     }
   }
+  if (passFunction(array[minIndex])) {
+    return minIndex;
+  }
   return maxIndex;
 }

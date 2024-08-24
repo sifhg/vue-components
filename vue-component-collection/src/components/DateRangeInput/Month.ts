@@ -1,30 +1,33 @@
 import Day from "./Day";
 import { createColour, PGCanvas, PGShape, PGVector } from "./GoodCanvas/index";
-import { _daysIn } from "./supportFunctions";
+import { _daysIn, _getCutoffIndex } from "./supportFunctions";
 
 class Month {
   private _month: [number, number];
   private _days: Day[];
   private _width: number;
   private _height: number;
+  private _x: number;
   private _PGsquare: PGShape | undefined | null;
   constructor(
     month: number = 0,
     year: number,
     startDate: Date,
     endDate: Date,
-    unitSize: PGVector
+    unitSize: PGVector,
+    x: number
   ) {
     this._month = [month, year];
+    this._x = x;
     if (this._month[0] === undefined) {
       this._month[0] = 0;
     }
 
     const FIRST_DAY: Day = (() => {
       if (month === startDate.getMonth() && year === startDate.getFullYear()) {
-        return new Day(startDate.getDate() - 1, unitSize);
+        return new Day(startDate.getDate() - 1, unitSize, this._x);
       }
-      return new Day(0, unitSize);
+      return new Day(0, unitSize, this._x);
     })();
 
     this._days = [FIRST_DAY];
@@ -40,7 +43,9 @@ class Month {
     })();
 
     for (let d = 1; d < NUMBER_OF_DAYS; d++) {
-      this._days.push(new Day(FIRST_DAY.day + d, unitSize));
+      this._days.push(
+        new Day(FIRST_DAY.day + d, unitSize, this._x + d * unitSize.x)
+      );
     }
 
     this._width = 0;
@@ -51,22 +56,50 @@ class Month {
   }
 
   public display(
-    x: number,
-    y: number,
     canvas: PGCanvas,
-    displayFineness: Set<"days" | "months" | "years">
+    displayFineness: Set<"days" | "months" | "years">,
+    xVisible0: number,
+    xVisible1: number
   ) {
     if (displayFineness.has("months")) {
-      this._PGsquare = canvas.createRect(x, y, this._width, this._height);
+      this._PGsquare = canvas.createRect(
+        this._x,
+        displayFineness.has("days") ? this._height : 0,
+        this._width,
+        this._height
+      );
       this._PGsquare.colour = createColour("RGB", 33, 200, 192);
       this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
       this._PGsquare.borderRadius = this._height / 3;
+    } else {
+      this._PGsquare = null;
     }
     if (displayFineness.has("days")) {
-      this._days.forEach((day, index) => {
-        day.display(x + day.width * index, y - this._height, canvas);
+      const DISPLAY_DAYS: Array<Day> = (() => {
+        let slicedArray: Array<Day> = [...this._days];
+        if (this._x < xVisible0) {
+          slicedArray = slicedArray.slice(
+            _getCutoffIndex(slicedArray, (day) => day.x + day.width > xVisible0)
+          );
+        }
+        if (this._x + this._width > xVisible1) {
+          slicedArray = slicedArray.slice(
+            0,
+            _getCutoffIndex(slicedArray, (day) => day.x > xVisible1)
+          );
+        }
+        return slicedArray;
+      })();
+      DISPLAY_DAYS.forEach((day) => {
+        day.display(canvas, displayFineness, xVisible0, xVisible1);
       });
     }
+
+    // if (displayFineness.has("days")) {
+    //   this._days.forEach((day, index) => {
+    //     day.display(x + day.width * index, y - this._height, canvas);
+    //   });
+    // }
   }
 
   public toString(): [string, object] {
@@ -83,10 +116,7 @@ class Month {
     return this._width;
   }
   public get x(): number {
-    if (this._PGsquare) {
-      return this._PGsquare.x;
-    }
-    throw new Error(`This Month instance has no PGShape member.`);
+    return this._x;
   }
 }
 

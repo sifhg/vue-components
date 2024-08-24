@@ -8,7 +8,7 @@ import { PGVector } from "./PGVector.js";
  * Creates a canvas or links the a canvas project to a specified HTML canvas element.
  */
 class PGCanvas {
-  private shapes: Array<PGShape>;
+  private _shapes: Array<PGShape>;
   private _canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private canvasSize: Size;
@@ -24,7 +24,7 @@ class PGCanvas {
    * @param {string} canvasID - ID of the created canvas or of the HTML canvas element you want to link to.
    */
   constructor(canvasID: string) {
-    this.shapes = [];
+    this._shapes = [];
     this._mouseHistory = [new PGVector([0, 0]), new PGVector([0, 0])];
 
     document.addEventListener("mousemove", (event) => {
@@ -110,7 +110,7 @@ class PGCanvas {
     if (colour) {
       NEW_CIRCLE.colour = <ColourString>colour.toString();
     }
-    this.shapes.push(NEW_CIRCLE);
+    this._shapes.push(NEW_CIRCLE);
     return NEW_CIRCLE;
   }
 
@@ -159,7 +159,7 @@ class PGCanvas {
       NEW_PATH.label = arg2;
     }
 
-    this.shapes.push(NEW_PATH);
+    this._shapes.push(NEW_PATH);
     return NEW_PATH;
   }
 
@@ -251,7 +251,7 @@ class PGCanvas {
         NEW_RECT.label = ARG;
       }
     }
-    this.shapes.push(NEW_RECT);
+    this._shapes.push(NEW_RECT);
     return NEW_RECT;
   }
 
@@ -283,7 +283,7 @@ class PGCanvas {
     if (renderBackground) {
       this.ctx.fillRect(0, 0, this.canvasSize.w, this.canvasSize.h);
     }
-    for (const SHAPE of this.shapes) {
+    for (const SHAPE of this._shapes) {
       switch (SHAPE.tag) {
         case "circle":
           this.ctx.beginPath();
@@ -474,7 +474,7 @@ class PGCanvas {
    * Clears the canvas for any shapes.
    */
   clearCanvas() {
-    this.shapes = [];
+    this._shapes = [];
   }
 
   // DEFINED THIS LATER
@@ -517,6 +517,9 @@ class PGCanvas {
   }
   get height(): number {
     return this.canvasSize.h;
+  }
+  get shapes(): Array<PGShape> {
+    return [...this._shapes];
   }
 }
 

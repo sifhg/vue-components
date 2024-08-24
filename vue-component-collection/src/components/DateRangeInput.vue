@@ -197,14 +197,19 @@ function displayDates(yearArray: Array<Year>) {
   canvas.value?.clearCanvas();
 
   yearArray.forEach((year) => {
-    year.display(canvas.value!, new Set(props.displayFineness));
+    year.display(
+      canvas.value!,
+      new Set(props.displayFineness),
+      scrollBoxSize.value!.w,
+      canvas.value!.width - scrollBoxSize.value!.w
+    );
   });
   updateScrollBoxes();
   canvas.value?.render(true);
 }
 
 // Mouse position
-function searchYearPosition(mouseX: number): Year {
+function searchYearPosition(mouseX: number): Year | null {
   for (const YEAR of yearArray) {
     const X_INITIAL = YEAR.x;
     const X_TERMINAL = X_INITIAL + YEAR.width;
@@ -212,13 +217,11 @@ function searchYearPosition(mouseX: number): Year {
       return YEAR;
     }
   }
-  throw new Error(
-    `Position ${mouseX} does not correspond to a position of a PGShape of a Year.`
-  );
+  return null;
 }
 function searchMonthPosition(mouseX: number, year?: Year): Month {
   const YEAR = year ?? searchYearPosition(mouseX);
-  for (const MONTH of YEAR.months) {
+  for (const MONTH of YEAR!.months) {
     const X_INITIAL = MONTH.x;
     const X_TERMINAL = X_INITIAL + MONTH.width;
     if (mouseX >= X_INITIAL && mouseX <= X_TERMINAL) {
@@ -296,6 +299,9 @@ function handleMousePosition(): void {
     return;
   }
   const YEAR = searchYearPosition(POSITION.x);
+  if (YEAR === null) {
+    return;
+  }
   if (depth === "years") {
     mousePositionState.value = {
       pos: POSITION,
@@ -410,6 +416,15 @@ onMounted(() => {
     "
   >
     Print array
+  </button>
+  <button
+    @click="
+      () => {
+        console.log(canvas?.shapes);
+      }
+    "
+  >
+    Print display
   </button>
   <button
     @click="
