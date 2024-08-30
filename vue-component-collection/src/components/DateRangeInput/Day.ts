@@ -6,11 +6,15 @@ class Day {
   private _width: number;
   private _height: number;
   private _PGsquare: PGShape | undefined | null;
+  private _selected: boolean;
+  private _hover: boolean;
   constructor(day: number, unitSize: PGVector, x: number) {
     this._day = day;
     this._width = unitSize.x;
     this._x = x;
     this._height = unitSize.y;
+    this._selected = false;
+    this._hover = false;
   }
 
   public display(
@@ -27,9 +31,24 @@ class Day {
       return;
     }
     this._PGsquare = canvas.createRect(this._x, 0, this._width, this._height);
-    this._PGsquare.colour = createColour("GREYSCALE", 192);
-    this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+    this._PGsquare.colour = this._selected
+      ? createColour("RGB", 0, 0, 255)
+      : createColour("GREYSCALE", 223);
+
     this._PGsquare.borderRadius = this._height / 3;
+  }
+
+  public select(): void {
+    this._selected = true;
+  }
+  public deselect(): void {
+    this._selected = false;
+  }
+  public mouseEnter(): void {
+    this._hover = true;
+  }
+  public mouseLeave(): void {
+    this._hover = false;
   }
 
   public get width(): number {

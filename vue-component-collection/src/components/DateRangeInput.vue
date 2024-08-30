@@ -79,7 +79,7 @@ const unitSize = ref(new PGVector(props.unitSize));
 const FIRST_DATE = props.firstDate
   ? props.firstDate
   : _dateSubtraction(props.lastDate, "1y");
-let yearArray: Array<Year> = [];
+const yearArray = ref<Array<Year>>([]);
 
 // Canvas state
 const canvas = ref<PGCanvas>();
@@ -107,7 +107,7 @@ function adjustWidth() {
 
   width.value = parentElement.value?.clientWidth;
   canvas.value?.setCanvasSize(width.value!, canvas.value.height);
-  yearArray = _getYearArray(
+  yearArray.value = _getYearArray(
     FIRST_DATE,
     props.lastDate,
     unitSize.value.clone(),
@@ -116,7 +116,7 @@ function adjustWidth() {
     canvas.value.width - scrollBoxSize.value.w,
     props.displayFineness
   );
-  displayDates(yearArray);
+  displayDates(yearArray.value as Array<Year>);
 }
 
 /**
@@ -210,7 +210,7 @@ function displayDates(yearArray: Array<Year>) {
 
 // Mouse position
 function searchYearPosition(mouseX: number): Year | null {
-  for (const YEAR of yearArray) {
+  for (const YEAR of yearArray.value as Array<Year>) {
     const X_INITIAL = YEAR.x;
     const X_TERMINAL = X_INITIAL + YEAR.width;
     if (mouseX >= X_INITIAL && mouseX <= X_TERMINAL) {
@@ -361,7 +361,7 @@ function handleScroll(step: number, skipCheck: boolean = false): void {
     offsetX.value += step;
   }
 
-  yearArray = _getYearArray(
+  yearArray.value = _getYearArray(
     FIRST_DATE,
     props.lastDate,
     unitSize.value.clone(),
@@ -370,7 +370,31 @@ function handleScroll(step: number, skipCheck: boolean = false): void {
     canvas.value!.width - scrollBoxSize.value!.w,
     props.displayFineness
   );
-  displayDates(yearArray);
+  displayDates(yearArray.value as Array<Year>);
+}
+
+function handleHover(): void {
+  if (!mousePositionState.value.canvas) {
+    return;
+  }
+  let year: number;
+  let month: number;
+  let day: number;
+  if (mousePositionState.value.layer) {
+    year = mousePositionState.value.year;
+  }
+  switch (mousePositionState.value.layer) {
+    case "day":
+      day = mousePositionState.value.day;
+    case "month":
+      month = mousePositionState.value.month;
+    case "year":
+      year = mousePositionState.value.year;
+  }
+  switch (mousePositionState.value.layer) {
+    case "year":
+    // Finish this function
+  }
 }
 
 /**
@@ -411,7 +435,7 @@ onMounted(() => {
     w: unitSize.value.y * 2,
     h: canvas.value.height,
   };
-  yearArray = _getYearArray(
+  yearArray.value = _getYearArray(
     FIRST_DATE,
     props.lastDate,
     unitSize.value.clone(),
@@ -421,7 +445,7 @@ onMounted(() => {
     props.displayFineness
   );
 
-  displayDates(yearArray);
+  displayDates(yearArray.value as Array<Year>);
 
   // Resize observer
   const RESIZE_OBSERVER = new ResizeObserver(adjustWidth);

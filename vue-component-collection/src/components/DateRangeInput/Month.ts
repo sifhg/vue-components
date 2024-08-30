@@ -9,6 +9,8 @@ class Month {
   private _height: number;
   private _x: number;
   private _PGsquare: PGShape | undefined | null;
+  private _selected: boolean;
+  private _hover: boolean;
   constructor(
     month: number = 0,
     year: number,
@@ -53,6 +55,8 @@ class Month {
       this._width += DAY.width;
     });
     this._height = unitSize.y;
+    this._selected = false;
+    this._hover = false;
   }
 
   public display(
@@ -68,8 +72,10 @@ class Month {
         this._width,
         this._height
       );
-      this._PGsquare.colour = createColour("RGB", 33, 200, 192);
-      this._PGsquare.setStroke(1, createColour("GREYSCALE", 0));
+      this._PGsquare.colour = this._selected
+        ? createColour("RGB", 0, 0, 255)
+        : createColour("GREYSCALE", 223);
+
       this._PGsquare.borderRadius = this._height / 3;
     } else {
       this._PGsquare = null;
@@ -94,12 +100,27 @@ class Month {
         day.display(canvas, displayFineness, xVisible0, xVisible1);
       });
     }
+  }
 
-    // if (displayFineness.has("days")) {
-    //   this._days.forEach((day, index) => {
-    //     day.display(x + day.width * index, y - this._height, canvas);
-    //   });
-    // }
+  public select(): void {
+    this._selected = true;
+    this._days.forEach((day) => {
+      day.select();
+    });
+  }
+  public deselect(): void {
+    this._selected = false;
+  }
+  public deselectAll(): void {
+    this._days.forEach((day) => {
+      day.deselect();
+    });
+  }
+  public mouseEnter(): void {
+    this._hover = true;
+  }
+  public mouseLeave(): void {
+    this._hover = false;
   }
 
   public toString(): [string, object] {
