@@ -205,6 +205,7 @@ function displayDates(yearArray: Array<Year>) {
     );
   });
   updateScrollBoxes();
+  handleHover();
   canvas.value?.render(true);
 }
 
@@ -373,11 +374,17 @@ function handleScroll(step: number, skipCheck: boolean = false): void {
   displayDates(yearArray.value as Array<Year>);
 }
 
+/**
+ * Informs an element if the mouse is hovering over it.
+ */
 function handleHover(): void {
+  yearArray.value.forEach((eachYear) => {
+    eachYear.mouseLeave();
+  });
   if (!mousePositionState.value.canvas) {
     return;
   }
-  let year: number;
+  let year: number | undefined;
   let month: number;
   let day: number;
   if (mousePositionState.value.layer) {
@@ -391,9 +398,12 @@ function handleHover(): void {
     case "year":
       year = mousePositionState.value.year;
   }
-  switch (mousePositionState.value.layer) {
-    case "year":
-    // Finish this function
+
+  for (const YEAR of yearArray.value) {
+    if (YEAR.year === year) {
+      YEAR.mouseEnter();
+      return;
+    }
   }
 }
 
@@ -468,6 +478,14 @@ onMounted(() => {
     @mousedown="startScroll(16)"
     @mouseup="stopScroll"
     @mouseleave="stopScroll"
+    @mousemove="() => {
+      handleMousePosition();
+      displayDates(yearArray as Array<Year>);
+      console.log(mousePositionState.pos.toString());
+      if(mousePositionState.canvas && mousePositionState.layer !== false) {
+        console.log(mousePositionState.year);
+      }
+    }"
     @contextmenu.prevent
   ></canvas>
   <p>{{ offsetX }}</p>

@@ -81,9 +81,13 @@ class Year {
       const Y = (displayFineness.size - 1) * this._height;
 
       this._PGsquare = canvas.createRect(X, Y, this._width, this._height);
-      this._PGsquare.colour = this._selected
-        ? createColour("RGB", 0, 0, 255)
-        : createColour("GREYSCALE", 223);
+      this._PGsquare.colour = createColour("GREYSCALE", 223);
+      if (this._hover) {
+        this._PGsquare.colour = createColour("RGB", 255, 0, 0);
+      }
+      if (this._selected) {
+        this._PGsquare.colour = createColour("RGB", 0, 0, 255);
+      }
 
       this._PGsquare.borderRadius = this._height / 3;
     } else {
