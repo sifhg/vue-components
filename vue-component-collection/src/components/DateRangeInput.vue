@@ -248,6 +248,10 @@ function searchDayPosition(mouseX: number, monthYear?: Month | Year): Day {
     `Position ${mouseX} does not correspond to a position of a PGShape of a Day.`
   );
 }
+
+/**
+ * Updates state of mouseposition.
+ */
 function handleMousePosition(): void {
   const POSITION =
     canvas.value?.mousePos.clone() ?? mousePositionState.value.pos.clone();
@@ -336,15 +340,24 @@ function handleMousePosition(): void {
   };
   return;
 }
+
+/**
+ * Offsets all Year, Month, and Day squares and renders the canvas with ned positions.
+ * @param {number} step - number of pixels to offset by.
+ * @param {boolean} skipCheck - if true, offset without checking mouse state.
+ */
 function handleScroll(step: number, skipCheck: boolean = false): void {
+  if (skipCheck) {
+    offsetX.value += step;
+    return;
+  }
   if (!mousePositionState.value.canvas) {
     return;
   }
-
   if (mousePositionState.value.scroll.left && offsetX.value - step >= 0) {
     offsetX.value -= step;
   }
-  if (skipCheck || mousePositionState.value.scroll.right) {
+  if (mousePositionState.value.scroll.right) {
     offsetX.value += step;
   }
 
@@ -358,6 +371,29 @@ function handleScroll(step: number, skipCheck: boolean = false): void {
     props.displayFineness
   );
   displayDates(yearArray);
+}
+
+/**
+ * Initiates a loop of updating mouse state and apply offsets to dates.
+ * @param {number} frameRate - by what framerate the offset will be offset.
+ */
+function startScroll(frameRate: number): void {
+  if (canvas.value === undefined) {
+    throw new Error(`canvas is not defined yet.`);
+  }
+  canvas.value.frameRate = frameRate;
+  canvas.value.startLoop();
+  canvas.value.draw(() => {
+    handleMousePosition();
+    handleScroll(10);
+  });
+}
+function stopScroll(): void {
+  if (canvas.value === undefined) {
+    throw new Error(`canvas is not defined yet.`);
+  }
+  canvas.value.stopLoop();
+  canvas.value.draw(() => {});
 }
 
 onMounted(() => {
@@ -405,6 +441,9 @@ onMounted(() => {
         console.log(START.getTime() - new Date().getTime());
       }
     "
+    @mousedown="startScroll(16)"
+    @mouseup="stopScroll"
+    @mouseleave="stopScroll"
     @contextmenu.prevent
   ></canvas>
   <p>{{ offsetX }}</p>

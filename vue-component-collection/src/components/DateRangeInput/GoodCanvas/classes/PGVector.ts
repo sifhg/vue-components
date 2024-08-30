@@ -4,7 +4,9 @@ class PGVector {
   private arrayVector: ArrayVector;
 
   constructor(x: number, y: number);
-  constructor(coordinate: Coordinate | ArrayVector);
+  constructor(coordinate: ArrayVector);
+  constructor(coordinate: Coordinate);
+  constructor(coordinate: ArrayVector | Coordinate);
   constructor(arg0: number | Coordinate | ArrayVector, arg1?: number) {
     if (typeof arg0 === "number" && typeof arg1 === "number") {
       this.arrayVector = [arg0, arg1];

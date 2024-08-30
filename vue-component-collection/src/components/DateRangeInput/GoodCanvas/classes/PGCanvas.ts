@@ -9,10 +9,12 @@ import { PGVector } from "./PGVector.js";
  */
 class PGCanvas {
   private _shapes: Array<PGShape>;
-  private _canvas: HTMLCanvasElement;
+  private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private canvasSize: Size;
   private backgroundColour: PGColour | undefined;
+  private _currentDraw?: () => void;
+  private _currentTimeout?: number;
   private _frameRate: number;
   private _runtimeFrameRate: number;
   private _frameCount: number;
@@ -38,18 +40,18 @@ class PGCanvas {
       const NEW_CANVAS = document.createElement("canvas");
       NEW_CANVAS.id = canvasID;
       document.getElementsByTagName("body")[0].appendChild(NEW_CANVAS);
-      this._canvas = NEW_CANVAS;
+      this.canvas = NEW_CANVAS;
     } else if (CANVAS.tagName !== "CANVAS") {
       throw new Error(
         `HTML element of id ${canvasID} bust be a canvas element. HTML element of id is a "${CANVAS.tagName}" element`
       );
     } else {
-      this._canvas = <HTMLCanvasElement>CANVAS;
+      this.canvas = <HTMLCanvasElement>CANVAS;
     }
-    this.ctx = <CanvasRenderingContext2D>this._canvas.getContext("2d");
+    this.ctx = <CanvasRenderingContext2D>this.canvas.getContext("2d");
     this.canvasSize = {
-      w: this._canvas.width,
-      h: this._canvas.height,
+      w: this.canvas.width,
+      h: this.canvas.height,
     };
     this._frameRate = 30;
     this._runtimeFrameRate = this._frameRate;
@@ -67,8 +69,8 @@ class PGCanvas {
       w: w,
       h: h,
     };
-    this._canvas.width = w;
-    this._canvas.height = h;
+    this.canvas.width = w;
+    this.canvas.height = h;
   }
 
   /**
@@ -427,10 +429,29 @@ class PGCanvas {
    * @param {function} callback
    */
   draw(callback: () => void) {
+    if (this._currentTimeout) {
+      clearTimeout(this._currentTimeout);
+    }
+
+    this._currentDraw = callback;
+
+    this._cycle();
+  }
+
+  /**
+   * A helper method that manages the execution of the drawing callback
+   * function on each frame. This method adjusts the frame delay based
+   * on the execution time of the callback to maintain a consistent frame
+   * rate. It continues looping as long as the `isLooping` condition is true.
+   * @private
+   */
+  private _cycle() {
     let delay = 1000 / this._frameRate;
     this._frameCount++;
     const START = Date.now();
-    callback();
+
+    this._currentDraw!();
+
     const EXECUTION_TIME = Date.now() - START;
     if (EXECUTION_TIME > 1000 / this._frameRate) {
       delay = 0;
@@ -439,11 +460,11 @@ class PGCanvas {
       delay = 1000 / this._frameRate - EXECUTION_TIME;
       this._runtimeFrameRate = this._frameRate;
     }
+
     if (this.isLooping()) {
-      const NEXT = () => {
-        this.draw(callback);
-      };
-      setTimeout(NEXT, delay);
+      this._currentTimeout = setTimeout(() => {
+        this._cycle();
+      }, delay);
     }
   }
 
@@ -486,7 +507,7 @@ class PGCanvas {
    * @returns {PGVector}
    */
   private calculateMousePosition(event: MouseEvent): PGVector {
-    const CANVAS_BOUNDING_RECT = this._canvas.getBoundingClientRect();
+    const CANVAS_BOUNDING_RECT = this.canvas.getBoundingClientRect();
     return new PGVector(
       Math.floor(event.clientX - CANVAS_BOUNDING_RECT.x),
       Math.floor(event.clientY - CANVAS_BOUNDING_RECT.y)
@@ -499,9 +520,6 @@ class PGCanvas {
   }
   get frameRate(): number {
     return this._frameRate;
-  }
-  get HTMLElement(): HTMLCanvasElement {
-    return this._canvas;
   }
   get runtimeFrameRate(): number {
     return this._runtimeFrameRate;
@@ -518,8 +536,8 @@ class PGCanvas {
   get height(): number {
     return this.canvasSize.h;
   }
-  get shapes(): Array<PGShape> {
-    return [...this._shapes];
+  get shapes(): PGShape[] {
+    return this._shapes;
   }
 }
 
